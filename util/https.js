@@ -39,3 +39,37 @@ exports.get = function(options, resolve, reject) {
   });
 };
 
+
+exports.post = function(options, resolve, reject) {
+  var request = options.request;
+  var timeout = options.timeout;
+  var fmt = options.fmt;
+
+  request.method = 'POST';
+  request.withCredentials = false;
+  
+  var req = https.request(request, res => {
+    let body = '';
+    res.on('data', d => {
+      body += d;
+    });
+    res.on('end'), () => {
+      if (fmt !== 'html') {
+        body = JSON.parse(body);
+      }
+      resolve(body);
+    });
+  });
+
+  req.on('error', err => {
+    reject(err);
+  });
+
+  req.on('socket', socket => {
+    socket.setTimeout(timeout);
+    socket.on('timeout', () => {
+      req.abort();
+    });
+  });
+};
+
