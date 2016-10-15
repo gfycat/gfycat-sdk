@@ -1,5 +1,6 @@
 # gfycat-sdk
 [![Build Status](https://api.travis-ci.org/kngroo/gfycat-api.svg?branch=master)](https://travis-ci.org/kngroo/gfycat-api)
+
 Javascript API wrapper for [Gfycat API](https://developers.gfycat.com) that supports **promises**.
 
 
