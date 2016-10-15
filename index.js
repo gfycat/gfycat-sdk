@@ -1,23 +1,5 @@
 'use strict';
 
-// const queryString = require('querystring');
-// const httpService = require('./util/http');
-
-// const API_HOST = 'api.gfycat.com';
-// const API_BASE_PATH = '/v1/';
-
-// const promiseSupport = typeof Promise !== 'undefined';
-
-// function handleError(err, callback) {
-//   if (callback) {
-//     return callback(err);
-//   } else if (promisesExist) {
-//     return Promise.reject(err);
-//   } else {
-//     thre new Error(err);
-//   }
-// }
-
 const fs = require('fs');
 const https = require('https');
 const querystring = require('querystring');
