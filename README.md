@@ -1,7 +1,7 @@
 # gfycat-sdk
 [![NPM](https://nodei.co/npm/gfycat-sdk.png)](https://nodei.co/npm/gfycat-sdk/)
+
 [![Build Status](https://api.travis-ci.org/kngroo/gfycat-sdk.svg?branch=master)](https://travis-ci.org/kngroo/gfycat-sdk)
-[![Dependencies](https://david-dm.org/kngroo/gfycat-sdk.svg)](https://david-dm.org/kngroo/gfycat-sdk.svg)
 
 Javascript API wrapper for [Gfycat.com](https://gfycat.com) [API](https://developers.gfycat.com) that supports **promises**.
 
