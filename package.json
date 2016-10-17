@@ -7,7 +7,7 @@
     "test": "istanbul cover _mocha -- -R spec"
   },
   "repository": {
-    "url": "git+https://github.com/kngroo/gfycat-api.git",
+    "url": "git+https://github.com/kngroo/gfycat-sdk.git",
     "type": "git"
   },
   "keywords": [
