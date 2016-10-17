@@ -30,6 +30,7 @@ Returns a promise that resolves to the api authentication token that is valid fo
 ```javascript
 gfycat.authenticate().then(data => {
   //Your app is now authenticated
+  assert.equal(data, gfycat.token);
   console.log('token', gfycat.token);
 });
 ```
