@@ -1,17 +1,20 @@
-# gfycat-api
+# gfycat-sdk
+[![Build Status](https://api.travis-ci.org/kngroo/gfycat-api.svg?branch=master)](https://travis-ci.org/kngroo/gfycat-api)
+[![Dependencies](https://david-dm.org/kngroo/gfycat-api.svg)](https://david-dm.org/kngroo/gfycat-api.svg)
+
 Javascript API wrapper for [Gfycat API](https://developers.gfycat.com) that supports **promises**.
 
 
 ## Installation
 ```bash
-npm install gfycat-api --save
+npm install gfycat-sdk --save
 ```
 
 ## Usage
 Obtain a client_id and client_secret for your integration from the [Gfycat developers portal](https://developers.gfycat.com/signup/#/apiform).
 
 ```javascript
-const Gfycat = require('gfycat-api');
+const Gfycat = require('gfycat-sdk');
 
 var gfycat = new Gfycat(client_id, client_secret);
 
