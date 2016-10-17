@@ -13,14 +13,15 @@
   "keywords": [
     "gfycat",
     "gif",
-    "api"
+    "api",
+    "sdk"
   ],
   "author": "Josh Kang, josh@gfycat.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kngroo/gfycat-api/issues"
+    "url": "https://github.com/kngroo/gfycat-sdk/issues"
   },
-  "homepage": "https://github.com/kngroo/gfycat-api#readme",
+  "homepage": "https://github.com/kngroo/gfycat-sdk#readme",
   "devDependencies": {
     "chai": "^3.5.0",
     "istanbul": "^0.4.5",
