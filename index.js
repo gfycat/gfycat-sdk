@@ -4,7 +4,6 @@ const fs = require('fs');
 const https = require('https');
 const querystring = require('querystring');
 const zlib = require('zlib');
-const gzip = zlib.createGunzip();
 
 /**
  *  Gfycat API wrapper
@@ -32,6 +31,7 @@ class Gfycat {
       };
 
       var req = https.request(options, res => {
+        var gzip = zlib.createGunzip();
         res.pipe(gzip);
         let body = [];
 
@@ -117,6 +117,53 @@ class Gfycat {
       req.on('error', e => {
         reject(e);
       });
+    });
+  }
+
+
+  /**
+   *  Upload
+   */
+  upload(source, options) {
+    //TODO: Add validation logic for options object
+    return new Promise( (resolve, reject) => {
+
+      var options = {
+        hostname: this.apiUrl,
+        path: '/v1/gfycats',
+        method: 'POST',
+        headers: {
+          'Accept-Encoding': 'gzip,deflate',
+          'Authorization': 'Bearer ' + this.token
+        }
+      };
+
+      var req = https.request(options, res => {
+        var gzip = zlib.createGunzip();
+        res.pipe(gzip);
+        let body = '';
+
+        gzip.on('data', d => {
+          body += d;
+        });
+
+        gzip.on('end', () => {
+          resolve(JSON.parse(body));
+        });
+
+        gzip.on('error', err => {
+          reject(err);
+        });
+      });
+
+      req.on('error', err => {
+        reject(err);
+      });
+
+      var postData = querystring.stringify(options);
+
+      req.write(postData);
+      req.end();
     });
   }
 }

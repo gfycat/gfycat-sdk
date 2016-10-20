@@ -18,9 +18,6 @@ Obtain a client_id and client_secret for your integration from the [Gfycat devel
 const Gfycat = require('gfycat-sdk');
 
 var gfycat = new Gfycat(client_id, client_secret);
-
-gfycat.authenticate();
-//Your app is now authenticated
 ```
 
 **For security reasons, we suggest storing the client id and secret in a secure location.**
@@ -31,10 +28,17 @@ Currently supported:
 ### Authenticate
 Returns a promise that resolves to the api authentication token that is valid for 1 hour
 
+```javascript
+gfycat.authenticate().then(data => {
+  //Your app is now authenticated
+  assert.equal(data, gfycat.token);
+  console.log('token', gfycat.token);
+});
+```
+
 ### Search
 Returns a promise that resolves to a gfycats object.
 
-Example
 ```javascript
 gfycat.search('hello').then(data => {
   console.log('gfycats', data);

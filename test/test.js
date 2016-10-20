@@ -64,8 +64,27 @@ describe('Gfycat JS SDK', () => {
             expect(err).to.not.exist;
           });
       });
-
     });
 
+    describe('#upload()', () => {
+      it('should resolve with data', () => {
+        var options = {
+          fetchUrl: 'https://scratch.gfycat.com/74EA41A8-1B23-EFA0-D51E-76FF2C250274.mp4',
+          captions: [{
+            startSeconds: 0,
+            duration: 3,
+            text: 'HIIII',
+            fontHeight: 50
+          }]
+        };
+
+        return gfycat.upload()
+          .then(d => {
+            expect(d).to.exist;
+          }, err => {
+            expect(err).to.not.exist;
+          });
+      });
+    });
   });
 });
