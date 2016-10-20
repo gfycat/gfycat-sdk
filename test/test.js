@@ -67,23 +67,33 @@ describe('Gfycat JS SDK', () => {
     });
 
     describe('#upload()', () => {
+      let gfyId = '';
       it('should resolve with data', () => {
         var options = {
-          fetchUrl: 'https://scratch.gfycat.com/74EA41A8-1B23-EFA0-D51E-76FF2C250274.mp4',
-          captions: [{
-            startSeconds: 0,
-            duration: 3,
-            text: 'HIIII',
-            fontHeight: 50
-          }]
+          'title': 'twitch',
+          'fetchUrl': 'https://scratch.gfycat.com/74EA41A8-1B23-EFA0-D51E-76FF2C250274.mp4',
+          'noMd5': true
         };
 
-        return gfycat.upload()
+        return gfycat.upload(options)
           .then(d => {
+            console.log('data', d);
             expect(d).to.exist;
+            gfyId = d.gfyname;
           }, err => {
             expect(err).to.not.exist;
           });
+      });
+
+      it('status', () => {
+        console.log('gfyid', gfyId);
+        return gfycat.checkUploadStatus(gfyId.toLowerCase()).then(st => {
+          console.log('status', st);
+          expect(st).to.exist;
+        }, err => {
+          console.log('err', err);
+          expect(err).to.not.exist;
+        });
       });
     });
   });

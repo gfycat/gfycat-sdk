@@ -124,7 +124,7 @@ class Gfycat {
   /**
    *  Upload
    */
-  upload(source, options) {
+  upload(opts) {
     //TODO: Add validation logic for options object
     return new Promise( (resolve, reject) => {
 
@@ -159,13 +159,49 @@ class Gfycat {
       req.on('error', err => {
         reject(err);
       });
-
-      var postData = querystring.stringify(options);
+      
+      var postData = JSON.stringify(opts);
 
       req.write(postData);
       req.end();
     });
   }
+
+
+  /**
+   *  Check upload status
+   */
+  checkUploadStatus(gfyId) {
+    return new Promise( (resolve, reject) => {
+      var options = {
+        hostname: this.apiUrl,
+        path: '/v1/gfycats/fetch/status/' + gfyId,
+        method: 'GET'
+      };
+
+      var req = https.get(options, res => {
+        let body = '';
+
+        res.on('data', d => {
+          body += d;
+        });
+
+        res.on('end', () => {
+          resolve(JSON.parse(body));
+        });
+
+        res.on('error', err => {
+          reject(err);
+        });
+      });
+
+      req.on('error', err => {
+        reject(err);
+      });
+    });
+  }
+
+
 }
 
 module.exports = Gfycat;
