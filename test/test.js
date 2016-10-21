@@ -11,7 +11,7 @@ describe('Gfycat JS SDK', () => {
 
     describe('#authenticate()', () => {
       it('should reject with error', () => {
-        return gfycat.search('hello', 1)
+        gfycat.search('hello', 1)
           .then(data => {
             expect(data).to.not.exist;
           }, err => {
@@ -21,7 +21,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should resolve with access token', () => {
-        return gfycat.authenticate()
+        gfycat.authenticate()
           .then(token => {
             expect(token).to.exist;
             expect(token).to.be.a('string');
@@ -31,7 +31,7 @@ describe('Gfycat JS SDK', () => {
 
     describe('#search()', () => {
       it('should resolve with gfycats', () => {
-        return gfycat.search('hello', 1)
+        gfycat.search('hello', 1)
           .then(data => {
             expect(data).to.exist;
             expect(data).to.be.an('object');
@@ -45,7 +45,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should resolve with errorMessage: \'No search results\'', () => {
-        return gfycat.search('asdfjk;asdjfkajfahs')
+        gfycat.search('asdfjk;asdjfkajfahs')
           .then(data => {
             expect(data).to.exist;
             expect(data).to.be.an('object');
@@ -56,7 +56,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should resolve with errorMessage: \'search_text is a required parameter for search\'', () => {
-        return gfycat.search('', 1)
+        gfycat.search('', 1)
           .then(data => {
             expect(data).to.exist;
             expect(data).to.have.key('errorMessage');
@@ -75,9 +75,8 @@ describe('Gfycat JS SDK', () => {
           'noMd5': true
         };
 
-        return gfycat.upload(options)
+        gfycat.upload(options)
           .then(d => {
-            console.log('data', d);
             expect(d).to.exist;
             gfyId = d.gfyname;
           }, err => {
@@ -86,12 +85,9 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('status', () => {
-        console.log('gfyid', gfyId);
-        return gfycat.checkUploadStatus(gfyId.toLowerCase()).then(st => {
-          console.log('status', st);
+        gfycat.checkUploadStatus(gfyId.toLowerCase()).then(st => {
           expect(st).to.exist;
         }, err => {
-          console.log('err', err);
           expect(err).to.not.exist;
         });
       });

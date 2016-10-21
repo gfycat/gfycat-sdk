@@ -1,9 +1,7 @@
 'use strict';
 
-const fs = require('fs');
-const https = require('https');
-const querystring = require('querystring');
-const zlib = require('zlib');
+const _http = require('./util/_http');
+const qs = require('querystring');
 
 /**
  *  Gfycat API wrapper
@@ -13,194 +11,139 @@ class Gfycat {
     this.apiUrl = 'api.gfycat.com';
     this.clientId = clientId;
     this.clientSecret = clientSecret;
+    this.promiseSupport = typeof Promise !== 'undefined';
     this.token = '';
   }
 
   /**
    *  Authenticate
    */
-  authenticate() {
-    return new Promise( (resolve, reject) => {
-      var options = {
-        hostname: this.apiUrl,
-        path: '/v1/oauth/token',
-        method: 'POST',
-        headers: {
-          'Accept-Encoding': 'gzip,deflate'
-        }
-      };
+  authenticate(callback) {
+    var postData = {
+      grant_type : 'client_credentials',
+      client_id : this.clientId,
+      client_secret : this.clientSecret
+    };
+    
+    var options = {
+      hostname: this.apiUrl,
+      path: '/v1/oauth/token',
+      method: 'POST',
+      postData: postData
+    };
 
-      var req = https.request(options, res => {
-        var gzip = zlib.createGunzip();
-        res.pipe(gzip);
-        let body = [];
-
-        gzip.on('data', d => {
-          body.push(d);
-        });
-
-        gzip.on('end', () => {
-          this.token = JSON.parse(body.join('')).access_token;
-          resolve(this.token);
-        });
-      });
-
-      req.on('error', e => {
-        reject();
-      });
-
-      var postData = JSON.stringify({
-        'grant_type' : 'client_credentials',
-        'client_id' : this.clientId,
-        'client_secret' : this.clientSecret
-      });
-
-      req.write(postData);
-      req.end();
-    }); 
+    return this._request(options, callback);
   }
 
   
   /**
    *  Search
    */
-  search(keyword, count) {
-    return new Promise( (resolve, reject) => {
-      if (typeof count === 'undefined') count = 1;
-      
-      var queryParams = querystring.stringify({
-        search_text: keyword,
-        count: count 
-      });
+  search(keyword, count = 1, random = false, callback) {
+    var queryParams = {
+      search_text: keyword,
+      count: count,
+      random: random
+    };
 
-      var options = {
-        hostname: this.apiUrl,
-        path: '/v1/gfycats/search?' + queryParams,
-        method: 'GET',
-        headers: {
-          'Accept-Encoding': 'gzip,deflate',
-          'Authorization': 'Bearer ' + this.token
-        }
-      };
+    var options = {
+      hostname: this.apiUrl,
+      path: '/v1/gfycats/search',
+      method: 'GET',
+      query: queryParams
+    };
 
-      var req = https.get(options, res => {
-        var output;
-        switch (res.headers['content-encoding']) {
-          case 'gzip' || 'deflate':
-            output = zlib.createUnzip();
-            res.pipe(output);
-            break;
-          default:
-            output = res;
-            break;
-        }
-
-        if (res.statusCode === 401) {
-          reject(res.statusMessage);
-        }
-        
-        let body = '';
-
-        output.on('data', d => {
-          body += d;
-        });
-
-        output.on('end', () => {
-          resolve(JSON.parse(body));
-        });
-
-        output.on('error', e => {
-          reject(e);
-        });
-      });
-
-      req.on('error', e => {
-        reject(e);
-      });
-    });
+    return this._request(options, callback);
   }
 
 
   /**
    *  Upload
    */
-  upload(opts) {
+  upload(opts, callback) {
     //TODO: Add validation logic for options object
-    return new Promise( (resolve, reject) => {
+    
+    var options = {
+      hostname: this.apiUrl,
+      path: '/v1/gfycats',
+      method: 'POST',
+      postData: opts
+    };
 
-      var options = {
-        hostname: this.apiUrl,
-        path: '/v1/gfycats',
-        method: 'POST',
-        headers: {
-          'Accept-Encoding': 'gzip,deflate',
-          'Authorization': 'Bearer ' + this.token
-        }
-      };
-
-      var req = https.request(options, res => {
-        var gzip = zlib.createGunzip();
-        res.pipe(gzip);
-        let body = '';
-
-        gzip.on('data', d => {
-          body += d;
-        });
-
-        gzip.on('end', () => {
-          resolve(JSON.parse(body));
-        });
-
-        gzip.on('error', err => {
-          reject(err);
-        });
-      });
-
-      req.on('error', err => {
-        reject(err);
-      });
-      
-      var postData = JSON.stringify(opts);
-
-      req.write(postData);
-      req.end();
-    });
+    return this._request(options, callback);
   }
 
 
   /**
    *  Check upload status
    */
-  checkUploadStatus(gfyId) {
-    return new Promise( (resolve, reject) => {
-      var options = {
-        hostname: this.apiUrl,
-        path: '/v1/gfycats/fetch/status/' + gfyId,
-        method: 'GET'
-      };
+  checkUploadStatus(gfyId, callback) {
+    var options = {
+      hostname: this.apiUrl,
+      path: '/v1/gfycats/fetch/status/' + gfyId,
+      method: 'GET'
+    };
 
-      var req = https.get(options, res => {
-        let body = '';
-
-        res.on('data', d => {
-          body += d;
-        });
-
-        res.on('end', () => {
-          resolve(JSON.parse(body));
-        });
-
-        res.on('error', err => {
-          reject(err);
-        });
-      });
-
-      req.on('error', err => {
-        reject(err);
-      });
-    });
+    return this._request(options, callback);
   }
 
+
+  /**
+   *  Helper function for making http requests
+   */
+  _request(options, callback) {
+    if (!callback && !this.promiseSupport) {
+      throw new Error('Promises unsupported. Use callback functions instead.');
+    }
+
+    var query = typeof options.query !== 'undefined' ? qs.stringify(options.query) : '';
+    var apiPath = query ? options.path + '?' + query : options.path;
+    
+    var headers = {
+      'Accept-Encoding': 'gzip,deflate',
+      'Authorization': 'Bearer ' + this.token
+    };
+
+    if (options.headers) {
+      headers = Object.assign(headers, options.headers);
+    }
+
+    var httpOptions = {
+      request: {
+        hostname: this.apiUrl,
+        path: apiPath,
+        method: options.method || 'GET',
+        headers: headers
+      },
+      postData: options.postData || '',
+      timeout: options.timeout || 300,
+      fmt: options.query && options.query.fmt
+    };
+
+    /**
+     *  If callback function is provided, override promise handlers.
+     */
+    if (callback) {
+      var resolve = function(res) {
+        callback(null, res);
+      };
+
+      var reject = function(err) {
+        callback(err);
+      };
+
+      _http.request(httpOptions, resolve, reject); 
+    }
+    
+    /**
+     *  If no callback function is provided and promises are supported, use them.
+     */
+    else {
+      return new Promise( (resolve, reject) => {
+        _http.request(httpOptions, resolve, reject);
+      });
+    }
+  }
 
 }
 
