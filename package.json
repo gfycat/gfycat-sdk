@@ -4,7 +4,7 @@
   "description": "Javascript module for gfycat.com API supporting promises and callbacks",
   "main": "index.js",
   "scripts": {
-    "test": "istanbul cover _mocha -- -R spec"
+    "test": "istanbul cover _mocha -- ./test/test.js -R spec"
   },
   "repository": {
     "url": "git+https://github.com/kngroo/gfycat-sdk.git",

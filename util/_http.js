@@ -1,3 +1,5 @@
+'use strict';
+
 const https = require('https');
 const zlib = require('zlib');
 
@@ -11,40 +13,43 @@ const zlib = require('zlib');
  *   options.postData {Object} - Post data to be written to request stream
  */
 
-exports.request = function(options, resolve, reject) {
-  var request = options.request;
+exports.request = (options, resolve, reject) => {
   var timeout = options.timeout;
   var format = options.fmt;
 
-  var req = https.request(request, res => {
-    switch (res.header['content-encoding']) {
+  var req = https.request(options.request, res => {
+    switch (res.headers['content-encoding']) {
       case 'gzip' || 'deflate':
-        res = res.pipe(zlib.createUnzip());
+        var output = zlib.createUnzip();
+        res.pipe(output);
         break;
       default:
+        var output = res;
         break;
+    }
+
+    if (res.statusCode === 401) {
+      return reject(res.statusMessage);
     }
 
     let body = '';
 
-    res.on('data', d => {
+    output.on('data', d => {
       body += d;
     });
 
-    res.on('end', () => {
-      if (format !== 'html') {
-        body = JSON.parse(body);
-      }
-      resolve(body);
+    output.on('end', () => {
+      if (format !== 'html') body = JSON.parse(body);
+      return resolve(body);
     });
 
-    res.on('error', err => {
-      reject(err);
+    output.on('error', err => {
+      return reject(err);
     });
   });
 
   req.on('error', err => {
-    reject(err);
+    return reject(err);
   });
 
   if (options.postData) {

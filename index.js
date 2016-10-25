@@ -32,23 +32,95 @@ class Gfycat {
       postData: postData
     };
 
-    return this._request(options, callback);
+    this._request(options, (err, data) => {
+      if (err) {
+        if (callback) return callback(err);
+        else {
+          return new Promise( (resolve, reject) => {
+            if (err) reject(err);
+            else resolve(data);
+          });
+        }
+      } else {
+        this.token = data.access_token
+        if (callback) return callback(null, data);
+        else {
+          return new Promise( (resolve, reject) => {
+            if (err) reject(err);
+            else resolve(data);
+          });
+        }
+      }
+      // return new Promise( (resolve, reject) => {
+      //   if (err) reject(err);
+      //   else resolve(data);
+      // });
+    });
   }
 
   
   /**
    *  Search
    */
-  search(keyword, count = 1, random = false, callback) {
+  search(opts, callback) {
     var queryParams = {
-      search_text: keyword,
-      count: count,
-      random: random
+      search_text: opts.search_text,
+      count: opts.count || 1
     };
+
+    if (opts.random) queryParams.random = true;
+    if (opts.cursor) queryParams.cursor = opts.cursor;
 
     var options = {
       hostname: this.apiUrl,
       path: '/v1/gfycats/search',
+      method: 'GET',
+      query: queryParams
+    };
+
+    return this._request(options, callback);
+  }
+
+  
+  /**
+   *  Trending
+   */
+  trendingGifs(tag, count = 1, cursor, callback) {
+    var queryParams = {
+      count: count
+    };
+
+    if (tag) queryParams.tagName = tag;
+    if (cursor) queryParams.cursor = cursor;
+
+    var options = {
+      hostname: this.apiUrl,
+      path: '/v1/gfycats/trending',
+      method: 'GET',
+      query: queryParams
+    };
+
+    return this._request(options, callback);
+  }
+
+
+  /**
+   *  Trending tags
+   */
+  trendingTags(tagCount = 1, gifCount = 1, populated = false, cursor, callback) {
+    var queryParams = {
+      tagCount: tagCount,
+      gfyCount: gifCount
+    };
+
+    var path = '/v1/tags/trending';
+
+    if (cursor) queryParams.cursor = cursor;
+    if (populated) path += '/populated';
+
+    var options = {
+      hostname: this.apiUrl,
+      path: path,
       method: 'GET',
       query: queryParams
     };
@@ -100,9 +172,10 @@ class Gfycat {
     var apiPath = query ? options.path + '?' + query : options.path;
     
     var headers = {
-      'Accept-Encoding': 'gzip,deflate',
-      'Authorization': 'Bearer ' + this.token
+      'Accept-Encoding': 'gzip,deflate'
     };
+
+    if (this.token) headers['Authorization'] = 'Bearer ' + this.token;
 
     if (options.headers) {
       headers = Object.assign(headers, options.headers);
@@ -116,13 +189,11 @@ class Gfycat {
         headers: headers
       },
       postData: options.postData || '',
-      timeout: options.timeout || 300,
+      timeout: options.timeout || 30000,
       fmt: options.query && options.query.fmt
     };
 
-    /**
-     *  If callback function is provided, override promise handlers.
-     */
+    //If callback function is provided, override promise handlers.
     if (callback) {
       var resolve = function(res) {
         callback(null, res);
@@ -135,9 +206,7 @@ class Gfycat {
       _http.request(httpOptions, resolve, reject); 
     }
     
-    /**
-     *  If no callback function is provided and promises are supported, use them.
-     */
+    //If no callback function is provided and promises are supported, use them.
     else {
       return new Promise( (resolve, reject) => {
         _http.request(httpOptions, resolve, reject);
