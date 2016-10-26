@@ -165,7 +165,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('with tagName should resolve with gfycats', () => {
-        return gfycat.trendingGifs('hello', 1)
+        return gfycat.trendingGifs({tagName:'hello', count:1})
           .then(data => {
             expect(data).to.be.an('object');
             expect(data).to.include.keys('tag', 'cursor', 'gfycats', 'digest', 'newGfycats');
@@ -190,7 +190,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should populate with gfycats', () => {
-        return gfycat.trendingTags(1,1,true)
+        return gfycat.trendingTags({tagCount:1,gfyCount:1,populated:true})
           .then(data => {
             expect(data).to.be.an('object');
             expect(data).to.include.keys('tags', 'cursor');
@@ -204,16 +204,16 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should populate with appropriate gfycat and tag counts', () => {
-        return gfycat.trendingTags(1,1,true)
+        return gfycat.trendingTags({tagCount:2,gfyCount:3,populated:true})
           .then(data => {
             expect(data).to.be.an('object');
             expect(data).to.include.keys('tags', 'cursor');
             expect(data.tags).to.be.an('array');
             expect(data.cursor).to.be.a('string');
-            expect(data.tags.length).to.equal(1);
+            expect(data.tags.length).to.equal(2);
             expect(data.tags[0]).to.be.an('object');
             expect(data.tags[0]).to.include.keys('tag', 'cursor', 'gfycats');
-            expect(data.tags[0].gfycats.length).to.equal(1);
+            expect(data.tags[0].gfycats.length).to.equal(3);
           }, err => {
             expect(err).to.not.exist;
           });

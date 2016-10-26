@@ -84,19 +84,15 @@ class Gfycat {
   /**
    *  Trending
    */
-  trendingGifs(tag, count = 1, cursor, callback) {
-    var queryParams = {
-      count: count
-    };
-
-    if (tag) queryParams.tagName = tag;
-    if (cursor) queryParams.cursor = cursor;
+  trendingGifs(opts, callback) {
+    if (!opts) opts = {};
+    if (!("count" in opts)) opts.count = 1;
 
     var options = {
       hostname: this.apiUrl,
       path: '/v1/gfycats/trending',
       method: 'GET',
-      query: queryParams
+      query: opts
     };
 
     return this._request(options, callback);
@@ -106,22 +102,17 @@ class Gfycat {
   /**
    *  Trending tags
    */
-  trendingTags(tagCount = 1, gifCount = 1, populated = false, cursor, callback) {
-    var queryParams = {
-      tagCount: tagCount,
-      gfyCount: gifCount
-    };
-
+  trendingTags(opts, callback) {
     var path = '/v1/tags/trending';
-
-    if (cursor) queryParams.cursor = cursor;
-    if (populated) path += '/populated';
+    if (!opts) opts = {};
+    if (opts.populated) path += '/populated';
+    // if (cursor) queryParams.cursor = cursor;
 
     var options = {
       hostname: this.apiUrl,
       path: path,
       method: 'GET',
-      query: queryParams
+      query: opts
     };
 
     return this._request(options, callback);
