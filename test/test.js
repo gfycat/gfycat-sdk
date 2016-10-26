@@ -2,16 +2,46 @@
 
 const Gfycat = require('../');
 const expect = require('chai').expect;
-const sinon = require('sinon');
+// const sinon = require('sinon');
+
 
 describe('Gfycat JS SDK', () => {
   var gfycat = new Gfycat('2_Uu0k2J', 'Fo-QAvj4ijte_2b_jBNnX_kU-mI_u4K85LEPlrC8P4krc1LtaLTZkczGWq5Nj1Dl');
+
+  describe('Callback based response', () => {
+    
+    describe('#authenticate()', () => {
+      it('should callback with res and no err', (done) => {
+        gfycat.authenticate( (err, res) => {
+          expect(err).to.not.exist;
+          expect(res).to.exist;
+          expect(res).to.contain.keys('token_type', 'scope', 'expires_in', 'access_token');
+          expect(res.token_type).to.equal('bearer');
+          expect(res.access_token).to.be.a('string');
+          done();
+        });
+      });
+    });
+
+    describe('#search()', () => {
+      it('should callback with res and no err', done => {
+        gfycat.search({
+          search_text: 'hello'
+        }, (err, data) => {
+          expect(err).to.not.exist;
+          expect(data).to.exist;
+          done();
+        });
+      });
+    });
+
+  });
 
   describe('Promise based response', () => {
 
     describe('#authenticate()', () => {
       it('should reject with error', () => {
-        return gfycat.search('hello', 1)
+        gfycat.search('hello')
           .then(data => {
             expect(data).to.not.exist;
           }, err => {
@@ -21,17 +51,18 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should resolve with access token', () => {
-        return gfycat.authenticate()
+        gfycat.authenticate()
           .then(token => {
             expect(token).to.exist;
             expect(token).to.be.a('string');
+          }, err => {
           });
       });
     });
 
     describe('#search()', () => {
       it('should resolve with gfycats', () => {
-        return gfycat.search('hello', 1)
+        gfycat.search('hello', 1)
           .then(data => {
             expect(data).to.exist;
             expect(data).to.be.an('object');
@@ -45,7 +76,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should resolve with errorMessage: \'No search results\'', () => {
-        return gfycat.search('asdfjk;asdjfkajfahs')
+        gfycat.search('asdfjk;asdjfkajfahs')
           .then(data => {
             expect(data).to.exist;
             expect(data).to.be.an('object');
@@ -56,7 +87,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should resolve with errorMessage: \'search_text is a required parameter for search\'', () => {
-        return gfycat.search('', 1)
+        gfycat.search('', 1)
           .then(data => {
             expect(data).to.exist;
             expect(data).to.have.key('errorMessage');
@@ -64,7 +95,33 @@ describe('Gfycat JS SDK', () => {
             expect(err).to.not.exist;
           });
       });
+    });
 
+    describe('#upload()', () => {
+      let gfyId = '';
+      it('should resolve with data', () => {
+        var options = {
+          'title': 'twitch',
+          'fetchUrl': 'https://scratch.gfycat.com/74EA41A8-1B23-EFA0-D51E-76FF2C250274.mp4',
+          'noMd5': true
+        };
+
+        gfycat.upload(options)
+          .then(d => {
+            expect(d).to.exist;
+            gfyId = d.gfyname;
+          }, err => {
+            expect(err).to.not.exist;
+          });
+      });
+
+      it('status', () => {
+        gfycat.checkUploadStatus(gfyId.toLowerCase()).then(st => {
+          expect(st).to.exist;
+        }, err => {
+          expect(err).to.not.exist;
+        });
+      });
     });
 
   });
