@@ -10,8 +10,8 @@ const qs = require('querystring');
 class Gfycat {
   constructor(clientId, clientSecret) {
     this.apiUrl = 'api.gfycat.com';
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
+    this.clientId = clientId || '2_Uu0k2J';
+    this.clientSecret = clientSecret || 'Fo-QAvj4ijte_2b_jBNnX_kU-mI_u4K85LEPlrC8P4krc1LtaLTZkczGWq5Nj1Dl';
     this.promiseSupport = typeof Promise !== 'undefined';
     this.token = '';
   }
@@ -33,30 +33,28 @@ class Gfycat {
       postData: postData
     };
 
-    this._request(options, (err, data) => {
-      if (err) {
-        if (callback) return callback(err);
-        else {
-          return new Promise( (resolve, reject) => {
-            if (err) reject(err);
-            else resolve(data);
-          });
+    if (callback) {
+      this._request(options, (err, data) => {
+        if (err) {
+          return callback(err);
+        } else {
+          this.token = data.access_token
+          return callback(null, data);
         }
-      } else {
-        this.token = data.access_token
-        if (callback) return callback(null, data);
-        else {
-          return new Promise( (resolve, reject) => {
-            if (err) reject(err);
-            else resolve(data);
-          });
-        }
-      }
-      // return new Promise( (resolve, reject) => {
-      //   if (err) reject(err);
-      //   else resolve(data);
-      // });
-    });
+      });
+    } 
+    
+    else {
+      return new Promise( (resolve, reject) => {
+        this._request(options, (err, data) => {
+          if (err) reject(err);
+          else {
+            this.token = data.access_token;
+            resolve(data);
+          }
+        });
+      });
+    }
   }
 
 

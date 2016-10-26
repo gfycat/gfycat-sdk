@@ -27,11 +27,7 @@ exports.request = (options, resolve, reject) => {
         var output = res;
         break;
     }
-
-    if (res.statusCode === 401) {
-      return reject(res.statusMessage);
-    }
-
+    
     let body = '';
 
     output.on('data', d => {
@@ -40,6 +36,11 @@ exports.request = (options, resolve, reject) => {
 
     output.on('end', () => {
       if (format !== 'html') body = JSON.parse(body);
+
+      if (res.statusCode >= 400 && res.statusCode < 500) {
+        return reject(body);
+      }
+
       return resolve(body);
     });
 
