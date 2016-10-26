@@ -6,11 +6,21 @@ const expect = require('chai').expect;
 
 
 describe('Gfycat JS SDK', () => {
-  var gfycat = new Gfycat('2_Uu0k2J', 'Fo-QAvj4ijte_2b_jBNnX_kU-mI_u4K85LEPlrC8P4krc1LtaLTZkczGWq5Nj1Dl');
 
   describe('Callback based response', () => {
-    
+ 
+    let gfycat = new Gfycat();
+
     describe('#authenticate()', () => {
+
+      it('should callback with err', done => {
+        let gfycat = new Gfycat('asdf', 'asdf');
+        gfycat.authenticate( (err, res) => {
+          expect(err).to.exist;
+          done();
+        });
+      });
+      
       it('should callback with res and no err', (done) => {
         gfycat.authenticate( (err, res) => {
           expect(err).to.not.exist;
@@ -39,30 +49,47 @@ describe('Gfycat JS SDK', () => {
 
   describe('Promise based response', () => {
 
+    let gfycat = new Gfycat();
+
     describe('#authenticate()', () => {
+      // it('should reject with Unauthorized error', () => {
+      //   return gfycat.search({search_test: 'hello'})
+      //     .then(data => {
+      //       console.log('data', data);
+      //       expect(data).to.not.exist;
+      //     }, err => {
+      //       console.log('err', err);
+      //       expect(err).to.exist;
+      //       expect(err).to.equal('Unauthorized');
+      //     });
+      // });
+
+
       it('should reject with error', () => {
-        gfycat.search('hello')
+        let gfycat = new Gfycat('asdf', 'asdf');
+        return gfycat.authenticate()
           .then(data => {
             expect(data).to.not.exist;
           }, err => {
             expect(err).to.exist;
-            expect(err).to.equal('Unauthorized');
+            // expect(err).to.equal('Unauthorized');
           });
       });
 
       it('should resolve with access token', () => {
-        gfycat.authenticate()
-          .then(token => {
-            expect(token).to.exist;
-            expect(token).to.be.a('string');
+        return gfycat.authenticate()
+          .then(data => {
+            expect(data).to.exist;
+            expect(data).to.be.a('object');
           }, err => {
+            expect(err).to.not.exist;
           });
       });
     });
 
     describe('#search()', () => {
       it('should resolve with gfycats', () => {
-        gfycat.search('hello', 1)
+        return gfycat.search({search_text: 'hello'})
           .then(data => {
             expect(data).to.exist;
             expect(data).to.be.an('object');
@@ -76,7 +103,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should resolve with errorMessage: \'No search results\'', () => {
-        gfycat.search('asdfjk;asdjfkajfahs')
+        return gfycat.search({search_text: 'asdfjk;asdjfkajfahs'})
           .then(data => {
             expect(data).to.exist;
             expect(data).to.be.an('object');
@@ -87,26 +114,26 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should resolve with errorMessage: \'search_text is a required parameter for search\'', () => {
-        gfycat.search('', 1)
+        return gfycat.search({search_text: ''})
           .then(data => {
-            expect(data).to.exist;
-            expect(data).to.have.key('errorMessage');
+            expect(data).to.not.exist;
           }, err => {
-            expect(err).to.not.exist;
+            expect(err).to.exist;
+            expect(err).to.have.key('errorMessage');
           });
       });
     });
 
-    describe('#upload()', () => {
+    /*describe('#upload()', () => {
       let gfyId = '';
       it('should resolve with data', () => {
         var options = {
           'title': 'twitch',
-          'fetchUrl': 'https://scratch.gfycat.com/74EA41A8-1B23-EFA0-D51E-76FF2C250274.mp4',
+          'fetchUrl': '',
           'noMd5': true
         };
 
-        gfycat.upload(options)
+        return gfycat.upload(options)
           .then(d => {
             expect(d).to.exist;
             gfyId = d.gfyname;
@@ -116,13 +143,13 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('status', () => {
-        gfycat.checkUploadStatus(gfyId.toLowerCase()).then(st => {
+        return gfycat.checkUploadStatus(gfyId.toLowerCase()).then(st => {
           expect(st).to.exist;
         }, err => {
           expect(err).to.not.exist;
         });
       });
-    });
+    });*/
 
   });
 });
