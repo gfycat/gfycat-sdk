@@ -52,16 +52,18 @@ exports.request = (options, resolve, reject) => {
     return reject(err);
   });
 
-  if (options.postData) {
-    req.write(JSON.stringify(options.postData));
-    req.end();
-  }
-
   req.on('socket', socket => {
     socket.setTimeout(timeout);
     socket.on('timeout', () => {
       req.abort();
     });
   });
+
+  if (options.postData) {
+    req.write(JSON.stringify(options.postData));
+    req.end();
+  } else {
+    req.end();
+  }
 };
 

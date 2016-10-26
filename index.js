@@ -1,3 +1,4 @@
+/*jslint node: true */
 'use strict';
 
 const _http = require('./util/_http');
@@ -24,7 +25,7 @@ class Gfycat {
       client_id : this.clientId,
       client_secret : this.clientSecret
     };
-    
+
     var options = {
       hostname: this.apiUrl,
       path: '/v1/oauth/token',
@@ -58,7 +59,7 @@ class Gfycat {
     });
   }
 
-  
+
   /**
    *  Search
    */
@@ -81,7 +82,7 @@ class Gfycat {
     return this._request(options, callback);
   }
 
-  
+
   /**
    *  Trending
    */
@@ -134,7 +135,7 @@ class Gfycat {
    */
   upload(opts, callback) {
     //TODO: Add validation logic for options object
-    
+
     var options = {
       hostname: this.apiUrl,
       path: '/v1/gfycats',
@@ -170,12 +171,12 @@ class Gfycat {
 
     var query = typeof options.query !== 'undefined' ? qs.stringify(options.query) : '';
     var apiPath = query ? options.path + '?' + query : options.path;
-    
+
     var headers = {
       'Accept-Encoding': 'gzip,deflate'
     };
 
-    if (this.token) headers['Authorization'] = 'Bearer ' + this.token;
+    if (this.token) headers.Authorization = 'Bearer ' + this.token;
 
     if (options.headers) {
       headers = Object.assign(headers, options.headers);
@@ -202,10 +203,9 @@ class Gfycat {
       var reject = function(err) {
         callback(err);
       };
-
-      _http.request(httpOptions, resolve, reject); 
+      _http.request(httpOptions, resolve, reject);
     }
-    
+
     //If no callback function is provided and promises are supported, use them.
     else {
       return new Promise( (resolve, reject) => {
@@ -217,4 +217,3 @@ class Gfycat {
 }
 
 module.exports = Gfycat;
-

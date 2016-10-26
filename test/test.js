@@ -34,18 +34,17 @@ describe('Gfycat JS SDK', () => {
         });
       });
     });
+
   });
 
-/*  describe('Promise based response', () => {
+  describe('Promise based response', () => {
 
     describe('#authenticate()', () => {
       it('should reject with error', () => {
         gfycat.search('hello')
           .then(data => {
-            console.log('data', data);
             expect(data).to.not.exist;
           }, err => {
-            console.log('err', err);
             expect(err).to.exist;
             expect(err).to.equal('Unauthorized');
           });
@@ -54,11 +53,9 @@ describe('Gfycat JS SDK', () => {
       it('should resolve with access token', () => {
         gfycat.authenticate()
           .then(token => {
-            console.log('token', token);
             expect(token).to.exist;
             expect(token).to.be.a('string');
           }, err => {
-            console.log('err', err);
           });
       });
     });
@@ -67,7 +64,6 @@ describe('Gfycat JS SDK', () => {
       it('should resolve with gfycats', () => {
         gfycat.search('hello', 1)
           .then(data => {
-            console.log('data', data);
             expect(data).to.exist;
             expect(data).to.be.an('object');
             expect(data).to.include.keys('gfycats', 'found', 'cursor');
@@ -82,7 +78,6 @@ describe('Gfycat JS SDK', () => {
       it('should resolve with errorMessage: \'No search results\'', () => {
         gfycat.search('asdfjk;asdjfkajfahs')
           .then(data => {
-            console.log('data', data);
             expect(data).to.exist;
             expect(data).to.be.an('object');
             expect(data).to.have.property('errorMessage', 'No search results'); 
@@ -94,7 +89,6 @@ describe('Gfycat JS SDK', () => {
       it('should resolve with errorMessage: \'search_text is a required parameter for search\'', () => {
         gfycat.search('', 1)
           .then(data => {
-            console.log('data', data);
             expect(data).to.exist;
             expect(data).to.have.key('errorMessage');
           }, err => {
@@ -129,5 +123,6 @@ describe('Gfycat JS SDK', () => {
         });
       });
     });
-  });*/
+
+  });
 });
