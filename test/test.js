@@ -182,12 +182,14 @@ describe('Gfycat JS SDK', () => {
           .then(data => {
             expect(data.cursor).to.be.a('string');
             var a = gfycat.trendingGifs({cursor: data.cursor, count:1});
-            var b = gfycat.trendingGifs({cursor: data.cursor, count:1});
+            var b = gfycat.trendingGifs({cursor: data.cursor, count:2});
 
             return Promise.all([a,b]).then(function(values) {
+              expect(values[0].tag).to.equal(values[1].tag);
               expect(values[0].cursor).to.be.a('string');
               expect(values[0].gfycats.length).to.equal(1);
-              expect(values[0]).to.deep.equal(values[1]);
+              expect(values[1].gfycats.length).to.equal(2);
+              expect(values[0].gfycats[0]).to.deep.equal(values[1].gfycats[0]);
             });
           });
       });
@@ -231,6 +233,22 @@ describe('Gfycat JS SDK', () => {
             expect(data.tags[0].gfycats.length).to.equal(3);
           }, err => {
             expect(err).to.not.exist;
+          });
+      });
+
+      it('with cursor should have paging', () => {
+        return gfycat.trendingTags({tagCount:2,populated:true})
+          .then(data => {
+            expect(data.cursor).to.be.a('string');
+            var a = gfycat.trendingTags({cursor: data.cursor, tagCount:1, populated:true});
+            var b = gfycat.trendingTags({cursor: data.cursor, tagCount:2, populated:true});
+
+            return Promise.all([a,b]).then(function(values) {
+              expect(values[0].cursor).to.be.a('string');
+              expect(values[0].tags.length).to.equal(1);
+              expect(values[1].tags.length).to.equal(2);
+              expect(values[0].tags[0]).to.deep.equal(values[1].tags[0]);
+            });
           });
       });
 
