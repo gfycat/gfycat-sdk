@@ -79,6 +79,31 @@ describe('Gfycat JS SDK', () => {
           done();
         });
       });
+
+      it('should have paging with search cursor', done => {
+        gfycat.search({
+          search_text: 'cats'
+        }, (err, data) => {
+          expect(data.cursor).to.be.a('string');
+          gfycat.search({
+            cursor: data.cursor,
+            search_text: 'cats',
+            count:1
+          }, (err1, data1) => {
+            expect(data1.cursor).to.be.a('string');
+            expect(data1.gfycats.length).to.equal(1);
+            gfycat.search({
+              cursor: data.cursor,
+              search_text: 'cats',
+              count:2
+            }, (err2, data2) => {
+              expect(data2.gfycats.length).to.equal(2);
+              expect(data1.gfycats[0]).to.deep.equal(data2.gfycats[0]);
+              done();
+            });
+          });
+        });
+      });
     });
 
     describe('#trendingGifs()', () => {
@@ -106,6 +131,29 @@ describe('Gfycat JS SDK', () => {
           expect(data.cursor).to.be.a('string');
           expect(err).to.not.exist;
           done();
+        });
+      });
+
+      it('should have paging with trendingGifs cursor', done => {
+        gfycat.trendingGifs({
+        }, (err, data) => {
+          expect(data.cursor).to.be.a('string');
+          gfycat.trendingGifs({
+            cursor: data.cursor,
+            count:1
+          }, (err1, data1) => {
+            expect(data1.cursor).to.be.a('string');
+            expect(data1.gfycats.length).to.equal(1);
+            gfycat.trendingGifs({
+              cursor: data.cursor,
+              count:2
+            }, (err2, data2) => {
+              expect(data2.gfycats.length).to.equal(2);
+              expect(data1.tag).to.equal(data2.tag);
+              expect(data1.gfycats[0]).to.deep.equal(data2.gfycats[0]);
+              done();
+            });
+          });
         });
       });
     });
@@ -153,6 +201,32 @@ describe('Gfycat JS SDK', () => {
           expect(data.tags[0].gfycats.length).to.equal(3);
           expect(err).to.not.exist;
           done();
+        });
+      });
+
+      it('should have paging with trendingTags cursor', done => {
+        gfycat.trendingTags({
+          tagCount:2,
+          populated:true
+        }, (err, data) => {
+          expect(data.cursor).to.be.a('string');
+          gfycat.trendingTags({
+            cursor: data.cursor,
+            tagCount:1,
+            populated:true
+          }, (err1, data1) => {
+            expect(data1.cursor).to.be.a('string');
+            expect(data1.tags.length).to.equal(1);
+            gfycat.trendingTags({
+              cursor: data.cursor,
+              tagCount:2,
+              populated:true
+            }, (err2, data2) => {
+              expect(data2.tags.length).to.equal(2);
+              expect(data1.tags[0]).to.deep.equal(data2.tags[0]);
+              done();
+            });
+          });
         });
       });
     });
