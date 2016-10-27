@@ -21,7 +21,7 @@ describe('Gfycat JS SDK', () => {
         });
       });
       
-      it('should callback with res and no err', (done) => {
+      it('should callback with res and no err', done => {
         gfycat.authenticate( (err, res) => {
           expect(err).to.not.exist;
           expect(res).to.exist;
@@ -43,8 +43,119 @@ describe('Gfycat JS SDK', () => {
           done();
         });
       });
+
+      it('should resolve with gfycats', done => {
+        gfycat.search({
+          search_text: 'hello'
+        }, (err, data) => {
+          expect(data).to.be.an('object');
+          expect(data).to.include.keys('gfycats', 'found', 'cursor');
+          expect(data.gfycats).to.be.an('array');
+          expect(data.found).to.be.a('number');
+          expect(data.cursor).to.be.a('string');
+          done();
+        });
+      });
+
+      it('should resolve with errorMessage: \'No search results\'', done => {
+        gfycat.search({
+          search_text: 'asdfjk;asdjfkajfahs'
+        }, (err, data) => {
+          expect(data).to.exist;
+          expect(data).to.be.an('object');
+          expect(data).to.have.property('errorMessage', 'No search results'); 
+          expect(err).to.not.exist;
+          done();
+        });
+      });
+
+      it('should resolve with errorMessage: \'search_text is a required parameter for search\'', done => {
+        gfycat.search({
+          search_text: ''
+        }, (err, data) => {
+          expect(data).to.not.exist;
+          expect(err).to.exist;
+          expect(err).to.have.key('errorMessage');
+          done();
+        });
+      });
     });
 
+    describe('#trendingGifs()', () => {
+      it('should resolve with gfycats without tagName', done => {
+        gfycat.trendingGifs({
+        }, (err, data) => {
+          expect(data).to.be.an('object');
+          expect(data).to.include.keys('tag', 'cursor', 'gfycats', 'digest', 'newGfycats');
+          expect(data.gfycats).to.be.an('array');
+          expect(data.cursor).to.be.a('string');
+          expect(err).to.not.exist;
+          done();
+        });
+      });
+
+      it('should resolve with gfycats with tagName', done => {
+        gfycat.trendingGifs({
+          tagName:'hello',
+          count:1
+        }, (err, data) => {
+          expect(data).to.be.an('object');
+          expect(data).to.include.keys('tag', 'cursor', 'gfycats', 'digest', 'newGfycats');
+          expect(data.gfycats).to.be.an('array');
+          expect(data.gfycats.length).to.equal(1);
+          expect(data.cursor).to.be.a('string');
+          expect(err).to.not.exist;
+          done();
+        });
+      });
+    });
+
+    describe('#trendingTags()', () => {
+      it('should resolve with tags', done => {
+        gfycat.trendingTags({
+        }, (err, data) => {
+          expect(data).to.be.an('array');
+          expect(err).to.not.exist;
+          done();
+        });
+      });
+
+      it('should populate with gfycats', done => {
+        return gfycat.trendingTags({
+          tagCount:1,
+          gfyCount:1,
+          populated:true
+        }, (err, data) => {
+          expect(data).to.be.an('object');
+          expect(data).to.include.keys('tags', 'cursor');
+          expect(data.tags).to.be.an('array');
+          expect(data.cursor).to.be.a('string');
+          expect(data.tags[0]).to.be.an('object');
+          expect(data.tags[0]).to.include.keys('tag', 'cursor', 'gfycats');
+          expect(err).to.not.exist;
+          done();
+        });
+      });
+
+      it('should populate with appropriate gfycat and tag counts', done => {
+        gfycat.trendingTags({
+          tagCount:2,
+          gfyCount:3,
+          populated:true
+        }, (err, data) => {
+          expect(data).to.be.an('object');
+          expect(data).to.include.keys('tags', 'cursor');
+          expect(data.tags).to.be.an('array');
+          expect(data.cursor).to.be.a('string');
+          expect(data.tags.length).to.equal(2);
+          expect(data.tags[0]).to.be.an('object');
+          expect(data.tags[0]).to.include.keys('tag', 'cursor', 'gfycats');
+          expect(data.tags[0].gfycats.length).to.equal(3);
+          expect(err).to.not.exist;
+          done();
+        });
+      });
+    });
   });
 
   describe('Promise based response', () => {
@@ -122,7 +233,23 @@ describe('Gfycat JS SDK', () => {
             expect(err).to.have.key('errorMessage');
           });
       });
-    });
+
+      it('should have paging with search cursor', () => {
+        return gfycat.search({search_text: 'cats'})
+          .then(data => {
+            expect(data.cursor).to.be.a('string');
+            var a = gfycat.trendingGifs({cursor: data.cursor, search_text: 'cats', count:1});
+            var b = gfycat.trendingGifs({cursor: data.cursor, search_text: 'cats', count:2});
+
+            return Promise.all([a,b]).then(function(values) {
+              expect(values[0].cursor).to.be.a('string');
+              expect(values[0].gfycats.length).to.equal(1);
+              expect(values[1].gfycats.length).to.equal(2);
+              expect(values[0].gfycats[0]).to.deep.equal(values[1].gfycats[0]);
+            });
+          });
+      });
+    }); 
 
     /*describe('#upload()', () => {
       let gfyId = '';
@@ -152,7 +279,7 @@ describe('Gfycat JS SDK', () => {
     });*/
 
     describe('#trendingGifs()', () => {
-      it('no tagName should resolve with gfycats', () => {
+      it('should resolve with gfycats without tagName', () => {
         return gfycat.trendingGifs()
           .then(data => {
             expect(data).to.be.an('object');
@@ -164,7 +291,7 @@ describe('Gfycat JS SDK', () => {
           });
       });
 
-      it('with tagName should resolve with gfycats', () => {
+      it('should resolve with gfycats with tagName', () => {
         return gfycat.trendingGifs({tagName:'hello', count:1})
           .then(data => {
             expect(data).to.be.an('object');
@@ -177,7 +304,7 @@ describe('Gfycat JS SDK', () => {
           });
       });
 
-      it('with cursor should have paging', () => {
+      it('should have paging with trendingGifs cursor', () => {
         return gfycat.trendingGifs()
           .then(data => {
             expect(data.cursor).to.be.a('string');
@@ -236,7 +363,7 @@ describe('Gfycat JS SDK', () => {
           });
       });
 
-      it('with cursor should have paging', () => {
+      it('should have paging with trendingTags cursor', () => {
         return gfycat.trendingTags({tagCount:2,populated:true})
           .then(data => {
             expect(data.cursor).to.be.a('string');
@@ -251,8 +378,6 @@ describe('Gfycat JS SDK', () => {
             });
           });
       });
-
     });
-
   });
 });
