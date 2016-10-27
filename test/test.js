@@ -170,12 +170,27 @@ describe('Gfycat JS SDK', () => {
             expect(data).to.be.an('object');
             expect(data).to.include.keys('tag', 'cursor', 'gfycats', 'digest', 'newGfycats');
             expect(data.gfycats).to.be.an('array');
+            expect(data.gfycats.length).to.equal(1);
             expect(data.cursor).to.be.a('string');
           }, err => {
             expect(err).to.not.exist;
           });
       });
 
+      it('with cursor should have paging', () => {
+        return gfycat.trendingGifs()
+          .then(data => {
+            expect(data.cursor).to.be.a('string');
+            var a = gfycat.trendingGifs({cursor: data.cursor, count:1});
+            var b = gfycat.trendingGifs({cursor: data.cursor, count:1});
+
+            return Promise.all([a,b]).then(function(values) {
+              expect(values[0].cursor).to.be.a('string');
+              expect(values[0].gfycats.length).to.equal(1);
+              expect(values[0]).to.deep.equal(values[1]);
+            });
+          });
+      });
     });
 
     describe('#trendingTags()', () => {
