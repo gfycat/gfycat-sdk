@@ -15,14 +15,22 @@ describe('Gfycat JS SDK', () => {
 
       it('should callback with err', done => {
         let gfycat = new Gfycat('asdf', 'asdf');
-        gfycat.authenticate( (err, res) => {
+        var options = {
+          grant_type: 'client_credentials'
+        };
+
+        gfycat.authenticate(options, (err, res) => {
           expect(err).to.exist;
           done();
         });
       });
       
       it('should callback with res and no err', (done) => {
-        gfycat.authenticate( (err, res) => {
+        var options = {
+          grant_type: 'client_credentials'
+        };
+
+        gfycat.authenticate(options, (err, res) => {
           expect(err).to.not.exist;
           expect(res).to.exist;
           expect(res).to.contain.keys('token_type', 'scope', 'expires_in', 'access_token');
@@ -67,7 +75,11 @@ describe('Gfycat JS SDK', () => {
 
       it('should reject with error', () => {
         let gfycat = new Gfycat('asdf', 'asdf');
-        return gfycat.authenticate()
+        var options = {
+          grant_type: 'client_credentials'
+        };
+
+        return gfycat.authenticate(options)
           .then(data => {
             expect(data).to.not.exist;
           }, err => {
@@ -77,7 +89,11 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should resolve with access token', () => {
-        return gfycat.authenticate()
+        var options = {
+          grant_type: 'client_credentials'
+        };
+
+        return gfycat.authenticate(options)
           .then(data => {
             expect(data).to.exist;
             expect(data).to.be.a('object');
