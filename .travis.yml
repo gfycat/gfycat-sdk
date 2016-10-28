@@ -10,4 +10,4 @@ deploy:
   on:
     branch: master
     tags: true
-    repo: kngroo/gfycat-sdk
+    repo: gfycat/gfycat-sdk
