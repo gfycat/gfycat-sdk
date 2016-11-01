@@ -3,6 +3,7 @@
 
 const _http = require('./util/_http');
 const qs = require('querystring');
+// const fs = require('fs');
 
 /**
  *  Gfycat API wrapper
@@ -57,6 +58,54 @@ class Gfycat {
     }
   }
 
+  /**
+   * Checking if the username is available / username exists / username is valid
+   */
+  checkUsername(username, callback) {
+    // if (!opts) opts = {};
+    if (typeof username === 'undefined' || username == null) {
+      return this.handleError('invalid username', callback);
+    }
+
+    var path = '/v1/users/' + username;
+
+    var options = {
+      hostname: this.apiUrl,
+      path: path,
+      method: 'HEAD'
+    };
+
+    if (callback) {
+      this._request(options, (err, data) => {
+        if (err) {
+          if ([401, 404, 422].indexOf(err.statusCode) > -1) {
+            return callback(null, err);
+          } else {
+            callback(err);
+          }
+        } else {
+          return callback(null, data);
+        }
+      });
+    } 
+    
+    else {
+      return new Promise( (resolve, reject) => {
+        this._request(options, (err, data) => {
+          if (err) {
+            if ([401, 404, 422].indexOf(err.statusCode) > -1) {
+              resolve(err);
+            }
+            else {
+              reject(err);
+            }
+          } else {
+            resolve(data);
+          }
+        });
+      });
+    }
+  }
 
   /**
    *  Search
@@ -80,13 +129,33 @@ class Gfycat {
     return this._request(options, callback);
   }
 
+  /**
+   * Get info by ID
+   */
+  getInfoByID(gfyID, callback) {
+    // if (!opts) opts = {};
+    if (typeof gfyID === 'undefined' || gfyID == null) {
+      return this.handleError('invalid gfyID', callback);
+    }
+
+    var path = '/v1test/gfycats/' + gfyID;
+    // if ('gfyID' in opts) path += opts.gfyID;
+
+    var options = {
+      hostname: this.apiUrl,
+      path: path,
+      method: 'GET'
+    };
+
+    return this._request(options, callback);
+  }
 
   /**
    *  Trending
    */
   trendingGifs(opts, callback) {
     if (!opts) opts = {};
-    if (!("count" in opts)) opts.count = 1;
+    if (!('count' in opts)) opts.count = 1;
 
     var options = {
       hostname: this.apiUrl,
@@ -120,9 +189,10 @@ class Gfycat {
 
 
   /**
-   *  Upload
+   *  Upload by URL
    */
   upload(opts, callback) {
+    if (!opts) opts = {};
     //TODO: Add validation logic for options object
 
     var options = {
@@ -135,6 +205,60 @@ class Gfycat {
     return this._request(options, callback);
   }
 
+  /**
+   *  Upload file by PUT request.
+   *  For files under 5 MB.
+
+      Filesize is required in params
+   */
+  // uploadFileByPUT(keyname, opts, callback) {
+  //   if (!opts) opts = {};
+  //   if (!keyname) opts = '';
+  //   path = keyname;
+
+  //   var options = {
+  //     hostname: 'https://filedrop.gfycat.com/',
+  //     path: keyname,
+  //     method: 'PUT',
+  //     postData: opts
+  //   };
+
+  //   return this._request(options, callback);
+  // };
+
+  /**
+   *  Upload by File
+      fileinfo = {
+        filePath: PATH
+        fileName: NAME
+        contentType: contenttype (ex: video/mp4)
+      }
+   */
+  // uploadFile(opts, fileinfo, callback) {
+  //   if (!opts) opts = {};
+  //   if (!fileinfo) fileinfo = {};
+  //   if (!fileinfo.filePath) fileinfo.filePath = '';
+  //   //TODO: Add validation logic for options object
+
+  //   var form = req.form();
+  //   form.append('file', fs.createReadStream(fileinfo.filePath));
+
+  //   var options = {
+  //     hostname: 'https://filedrop.gfycat.com',
+  //     method: 'POST',
+  //     postData: opts,
+  //     formData: form
+  //   };
+
+  //   // return this._request(options, callback);
+
+  //   request.post(options, function optionalCallback(err, httpResponse, body) {
+  //     if (err) {
+  //       return console.error('upload failed:', err);
+  //     }
+  //     console.log('Upload successful!  Server responded with:', body);
+  //   });
+  // }
 
   /**
    *  Check upload status
@@ -149,6 +273,10 @@ class Gfycat {
     return this._request(options, callback);
   }
 
+  handleError(message, callback) {
+    if (callback) return callback(new Error(message));
+    else return Promise.reject(new Error(message));
+  }
 
   /**
    *  Helper function for making http requests

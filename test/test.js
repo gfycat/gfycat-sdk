@@ -2,6 +2,7 @@
 
 const Gfycat = require('../');
 const expect = require('chai').expect;
+const fs = require('fs');
 // const sinon = require('sinon');
 
 
@@ -33,6 +34,46 @@ describe('Gfycat JS SDK', () => {
       });
     });
 
+    describe('#checkUsername()', () => {
+      it('should resolve with \'401 Unauthorized\' (Invalid Token)', done => {
+        let noAuth = new Gfycat();
+        noAuth.checkUsername('ricardricard'
+        , (err, data) => {
+          expect(data.statusCode).to.equal(401);
+          expect(err).to.not.exist;
+          done();
+        });
+      });
+
+      it('should resolve with \'404 not found\' (Username Available)', done => {
+        gfycat.checkUsername('sdkfhajk'
+        , (err, data) => {
+          expect(data.statusCode).to.equal(404);
+          expect(err).to.not.exist;
+          done();
+        });
+      });
+
+      it('should resolve with \'2** No Content\' (Username Unavailable)', done => {
+        gfycat.checkUsername('ricardricard'
+        , (err, data) => {
+          expect(data.statusCode).to.be.at.least(200);
+          expect(data.statusCode).to.be.below(300);
+          expect(err).to.not.exist;
+          done();
+        });
+      });
+
+      it('should return an \'invalid username\' error', done => {
+        gfycat.checkUsername(null
+        , (err, data) => {
+          expect(data).to.not.exist;
+          expect(err).to.be.instanceof(Error);
+          done();
+        });
+      });
+    });
+
     describe('#search()', () => {
       it('should callback with res and no err', done => {
         gfycat.search({
@@ -53,13 +94,14 @@ describe('Gfycat JS SDK', () => {
           expect(data.gfycats).to.be.an('array');
           expect(data.found).to.be.a('number');
           expect(data.cursor).to.be.a('string');
+          expect(err).to.not.exist;
           done();
         });
       });
 
       it('should resolve with errorMessage: \'No search results\'', done => {
         gfycat.search({
-          search_text: 'asdfjk;asdjfkajfahs'
+          search_text: 'asdfjkasdjfkajfahs'
         }, (err, data) => {
           expect(data).to.exist;
           expect(data).to.be.an('object');
@@ -75,7 +117,7 @@ describe('Gfycat JS SDK', () => {
         }, (err, data) => {
           expect(data).to.not.exist;
           expect(err).to.exist;
-          expect(err).to.have.key('errorMessage');
+          expect(err).to.include.key('errorMessage');
           done();
         });
       });
@@ -103,6 +145,29 @@ describe('Gfycat JS SDK', () => {
             });
           });
         });
+      });
+    });
+
+    describe('#getInfoByID()', () => {
+      it('should resolve with gif info', done => {
+        gfycat.getInfoByID('BrutalSavageRekt'
+        , (err, data) => {
+          expect(data).to.be.an('object');
+          expect(data).to.include.keys('gfyItem');
+          expect(data.gfyItem).to.be.an('object');
+          expect(err).to.not.exist;
+          done();
+        });
+      });
+
+      it('should return an \'invalid gfyID\' error', done => {
+        gfycat.getInfoByID(null
+        , (err, data) => {
+          expect(data).to.not.exist;
+          expect(err).to.be.instanceof(Error);
+          done();
+        });
+        
       });
     });
 
@@ -272,6 +337,46 @@ describe('Gfycat JS SDK', () => {
       });
     });
 
+    describe('#checkUsername()', () => {
+      it('should resolve with \'401 Unauthorized\' (Invalid Token)', () => {
+        let noAuth = new Gfycat();
+        return noAuth.checkUsername('ricardricard')
+        .then(data => {
+          expect(data.statusCode).to.equal(401);
+        }, err => {
+          expect(err).to.not.exist;
+        });
+      });
+
+      it('should resolve with \'404 not found\' (Username Available)', () => {
+        return gfycat.checkUsername('sdkfhajk')
+        .then(data => {
+          expect(data.statusCode).to.equal(404);
+        }, err => {
+          expect(err).to.not.exist;
+        });
+      });
+
+      it('should resolve with \'2** No Content\' (Username Unavailable)', () => {
+        return gfycat.checkUsername('ricardricard')
+        .then(data => {
+          expect(data.statusCode).to.be.at.least(200);
+          expect(data.statusCode).to.be.below(300);
+        }, err => {
+          expect(err).to.not.exist;
+        });
+      });
+
+      it('should return an \'invalid username\' error', () => {
+        return gfycat.checkUsername()
+          .then(data => {
+            expect(data).to.not.exist;
+          }, err => {
+            expect(err).to.be.instanceof(Error);
+          });
+      });
+    });
+
     describe('#search()', () => {
       it('should resolve with gfycats', () => {
         return gfycat.search({search_text: 'hello'})
@@ -288,7 +393,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should resolve with errorMessage: \'No search results\'', () => {
-        return gfycat.search({search_text: 'asdfjk;asdjfkajfahs'})
+        return gfycat.search({search_text: 'asdfjkasdjfkajfahs'})
           .then(data => {
             expect(data).to.exist;
             expect(data).to.be.an('object');
@@ -304,7 +409,7 @@ describe('Gfycat JS SDK', () => {
             expect(data).to.not.exist;
           }, err => {
             expect(err).to.exist;
-            expect(err).to.have.key('errorMessage');
+            expect(err).to.include.key('errorMessage');
           });
       });
 
@@ -350,7 +455,56 @@ describe('Gfycat JS SDK', () => {
           expect(err).to.not.exist;
         });
       });
-    });*/
+    });
+
+    // Used Before to get a keyname
+    describe('#uploadFile()', () => {
+      let filename = '';
+      var options = {
+        'title': 'twitch',
+        'fetchUrl': '',
+        'noMd5': true
+      };
+      before('obtain filename', gfycat.upload(options)
+        .then(data => {
+          filename = data.gfyname;
+        }, err => {
+          expect(err).to.not.exist;
+        });
+      });
+
+      it('should resolve with data', () => {
+        return gfycat.uploadFile(options)
+          .then(data => {
+            expect(data).to.exist;
+
+          }, err => {
+            expect(err).to.not.exist;
+          });
+      });
+    }); */
+
+    describe('#getInfoByID()', () => {
+      it('should resolve with gif info', () => {
+        return gfycat.getInfoByID('BrutalSavageRekt')
+          .then(data => {
+            expect(data).to.be.an('object');
+            expect(data).to.include.keys('gfyItem');
+            expect(data.gfyItem).to.be.an('object');
+          }, err => {
+            expect(err).to.not.exist;
+          });
+      });
+
+      it('should throw an invalid gfyID error', () => {
+        return gfycat.getInfoByID()
+          .then(data => {
+            console.log(data);
+          }, err => {
+            expect(err).to.be.instanceof(Error);
+          });
+      });
+    });
 
     describe('#trendingGifs()', () => {
       it('should resolve with gfycats without tagName', () => {
