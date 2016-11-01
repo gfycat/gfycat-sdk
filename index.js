@@ -62,7 +62,6 @@ class Gfycat {
    * Checking if the username is available / username exists / username is valid
    */
   checkUsername(username, callback) {
-    // if (!opts) opts = {};
     if (typeof username === 'undefined' || username == null) {
       return this.handleError('invalid username', callback);
     }
@@ -132,8 +131,26 @@ class Gfycat {
   /**
    * Get info by ID
    */
-  getInfoByID(gfyID, callback) {
-    // if (!opts) opts = {};
+  getUserDetails(userID, callback) {
+    if (typeof userID === 'undefined' || userID == null) {
+      return this.handleError('invalid userID', callback);
+    }
+
+    var path = '/v1/users/' + userID;
+
+    var options = {
+      hostname: this.apiUrl,
+      path: path,
+      method: 'GET'
+    };
+
+    return this._request(options, callback);
+  }
+
+  /**
+   * Get info by ID
+   */
+  getGifDetails(gfyID, callback) {
     if (typeof gfyID === 'undefined' || gfyID == null) {
       return this.handleError('invalid gfyID', callback);
     }

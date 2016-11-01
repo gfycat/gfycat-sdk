@@ -148,9 +148,22 @@ describe('Gfycat JS SDK', () => {
       });
     });
 
-    describe('#getInfoByID()', () => {
+    describe('#getUserDetails()', () => {
       it('should resolve with gif info', done => {
-        gfycat.getInfoByID('BrutalSavageRekt'
+        gfycat.getUserDetails('ricardricard'
+        , (err, data) => {
+          expect(data).to.be.an('object');
+          expect(data).to.include.keys('userid', 'username', 'description', 'profileUrl', 'name', 'views',
+            'url', 'createDate', 'profileImageUrl', 'verified', 'followers', 'following');
+          expect(err).to.not.exist;
+          done();
+        });
+      });
+    });
+
+    describe('#getGifDetails()', () => {
+      it('should resolve with gif info', done => {
+        gfycat.getGifDetails('BrutalSavageRekt'
         , (err, data) => {
           expect(data).to.be.an('object');
           expect(data).to.include.keys('gfyItem');
@@ -161,7 +174,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should return an \'invalid gfyID\' error', done => {
-        gfycat.getInfoByID(null
+        gfycat.getGifDetails(null
         , (err, data) => {
           expect(data).to.not.exist;
           expect(err).to.be.instanceof(Error);
@@ -484,9 +497,31 @@ describe('Gfycat JS SDK', () => {
       });
     }); */
 
-    describe('#getInfoByID()', () => {
+    describe('#getUserDetails()', () => {
       it('should resolve with gif info', () => {
-        return gfycat.getInfoByID('BrutalSavageRekt')
+        return gfycat.getUserDetails('ricardricard')
+          .then(data => {
+            expect(data).to.be.an('object');
+            expect(data).to.include.keys('userid', 'username', 'description', 'profileUrl', 'name', 'views',
+              'url', 'createDate', 'profileImageUrl', 'verified', 'followers', 'following');
+          }, err => {
+            expect(err).to.not.exist;
+          });
+      });
+
+      // it('should throw an invalid userID error', () => {
+      //   return gfycat.getUserDetails()
+      //     .then(data => {
+      //       console.log(data);
+      //     }, err => {
+      //       expect(err).to.be.instanceof(Error);
+      //     });
+      // });
+    });
+
+    describe('#getGifDetails()', () => {
+      it('should resolve with gif info', () => {
+        return gfycat.getGifDetails('BrutalSavageRekt')
           .then(data => {
             expect(data).to.be.an('object');
             expect(data).to.include.keys('gfyItem');
@@ -497,7 +532,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should throw an invalid gfyID error', () => {
-        return gfycat.getInfoByID()
+        return gfycat.getGifDetails()
           .then(data => {
             console.log(data);
           }, err => {
