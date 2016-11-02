@@ -122,6 +122,17 @@ describe('Gfycat JS SDK', () => {
         });
       });
 
+      it('should resolve with gfycats', done => {
+        gfycat.search({
+        }, (err, data) => {
+          expect(data).to.not.exist;
+          expect(err).to.be.instanceof(Error);
+          done();
+        });
+      });
+
+      // Will sometimes fail due to search API updating in real time
+      // and because promises are asynchronous
       it('should have paging with search cursor', done => {
         gfycat.search({
           search_text: 'cats'
@@ -180,7 +191,28 @@ describe('Gfycat JS SDK', () => {
           expect(err).to.be.instanceof(Error);
           done();
         });
-        
+      });
+    });
+
+    describe('#userFeed()', () => {
+      it('should resolve with user feed', done => {
+        gfycat.userFeed('henrytest'
+        , (err, data) => {
+          expect(data).to.be.an('object');
+          expect(data).to.include.keys('gfycats', 'cursor');
+          expect(data.gfycats).to.be.an('array');
+          expect(err).to.not.exist;
+          done();
+        });
+      });
+
+      it('should return an \'invalid gfyID\' error', done => {
+        gfycat.userFeed(null
+        , (err, data) => {
+          expect(data).to.not.exist;
+          expect(err).to.be.instanceof(Error);
+          done();
+        });
       });
     });
 
@@ -426,6 +458,7 @@ describe('Gfycat JS SDK', () => {
           });
       });
 
+      // Will not error because Promise.all call both at the same time
       it('should have paging with search cursor', () => {
         return gfycat.search({search_text: 'cats'})
           .then(data => {
@@ -531,10 +564,32 @@ describe('Gfycat JS SDK', () => {
           });
       });
 
-      it('should throw an invalid gfyID error', () => {
+      it('should throw an \'invalid gfyID\' error', () => {
         return gfycat.getGifDetails()
           .then(data => {
-            console.log(data);
+            expect(data).to.not.exist;
+          }, err => {
+            expect(err).to.be.instanceof(Error);
+          });
+      });
+    });
+
+    describe('#userFeed()', () => {
+      it('should resolve with user feed', () => {
+        return gfycat.userFeed('henrytest')
+        .then(data => {
+          expect(data).to.be.an('object');
+          expect(data).to.include.keys('gfycats', 'cursor');
+          expect(data.gfycats).to.be.an('array');
+        }, err => {
+          expect(err).to.not.exist;
+        });
+      });
+
+      it('should return an \'invalid userID\' error', () => {
+        return gfycat.getGifDetails()
+          .then(data => {
+            expect(data).to.not.exist;
           }, err => {
             expect(err).to.be.instanceof(Error);
           });

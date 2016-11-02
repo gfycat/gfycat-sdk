@@ -107,9 +107,40 @@ class Gfycat {
   }
 
   /**
+   *  Create User
+   *  Not testing yet. Don't want to create a bunch of random users.
+   */
+  // createUser(opts, callback) {
+  //   if (!opts || !opts.hasOwnProperty('username')) {
+  //     return this.handleError('invalid Object', callback);
+  //   }
+
+  //   var queryParams = {
+  //     search_text: opts.search_text,
+  //     count: opts.count || 1
+  //   };
+
+  //   if (opts.random) queryParams.random = true;
+  //   if (opts.cursor) queryParams.cursor = opts.cursor;
+
+  //   var options = {
+  //     hostname: this.apiUrl,
+  //     path: '/v1/gfycats/search',
+  //     method: 'GET',
+  //     query: queryParams
+  //   };
+
+  //   return this._request(options, callback);
+  // }
+
+  /**
    *  Search
    */
   search(opts, callback) {
+    if (!opts || !opts.hasOwnProperty('search_text')) {
+      return this.handleError('invalid Object', callback);
+    }
+
     var queryParams = {
       search_text: opts.search_text,
       count: opts.count || 1
@@ -129,7 +160,7 @@ class Gfycat {
   }
 
   /**
-   * Get info by ID
+   * Get User info by ID
    */
   getUserDetails(userID, callback) {
     if (typeof userID === 'undefined' || userID == null) {
@@ -148,7 +179,7 @@ class Gfycat {
   }
 
   /**
-   * Get info by ID
+   * Get Gfy info by ID
    */
   getGifDetails(gfyID, callback) {
     if (typeof gfyID === 'undefined' || gfyID == null) {
@@ -156,7 +187,22 @@ class Gfycat {
     }
 
     var path = '/v1test/gfycats/' + gfyID;
-    // if ('gfyID' in opts) path += opts.gfyID;
+
+    var options = {
+      hostname: this.apiUrl,
+      path: path,
+      method: 'GET'
+    };
+
+    return this._request(options, callback);
+  }
+
+  userFeed(userID, callback) {
+    if (typeof userID === 'undefined' || userID == null) {
+      return this.handleError('invalid gfyID', callback);
+    }
+
+    var path = '/v1/users/' + userID + '/gfycats';
 
     var options = {
       hostname: this.apiUrl,
@@ -209,8 +255,7 @@ class Gfycat {
    *  Upload by URL
    */
   upload(opts, callback) {
-    if (!opts) opts = {};
-    //TODO: Add validation logic for options object
+    if (!opts) return this.handleError('invalid Object', callback);
 
     var options = {
       hostname: this.apiUrl,
