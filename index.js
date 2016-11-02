@@ -76,14 +76,12 @@ class Gfycat {
 
     if (callback) {
       this._request(options, (err, data) => {
-        if (err) {
-          if ([401, 404, 422].indexOf(err.statusCode) > -1) {
-            return callback(null, err);
-          } else {
-            callback(err);
-          }
+        if (data || [401, 422].indexOf(err.statusCode) > -1) {
+          return callback(null, false);
+        } else if (err && err.statusCode === 404) {
+          return callback(null, true);
         } else {
-          return callback(null, data);
+          callback(err);
         }
       });
     } 
@@ -91,15 +89,12 @@ class Gfycat {
     else {
       return new Promise( (resolve, reject) => {
         this._request(options, (err, data) => {
-          if (err) {
-            if ([401, 404, 422].indexOf(err.statusCode) > -1) {
-              resolve(err);
-            }
-            else {
-              reject(err);
-            }
+          if (data || [401, 422].indexOf(err.statusCode) > -1) {
+            resolve(false);
+          } else if (err && err.statusCode === 404) {
+            resolve(true);
           } else {
-            resolve(data);
+            reject(err);
           }
         });
       });
@@ -111,23 +106,30 @@ class Gfycat {
    *  Not testing yet. Don't want to create a bunch of random users.
    */
   // createUser(opts, callback) {
-  //   if (!opts || !opts.hasOwnProperty('username')) {
-  //     return this.handleError('invalid Object', callback);
+  //   // if (!opts || !opts.hasOwnProperty('username')) {
+  //   //   return this.handleError('invalid Object', callback);
+  //   // }
+
+  //   if (callback) {
+  //     this.checkUsername(opts.username
+  //       , (err, data) => {
+  //         if (err) return this.handleError('Username Taken', callback);
+  //         if (!data) return this.handleError('Invalid Username', callback);
+  //       });
+  //   } else {
+  //     this.checkUsername(opts.username)
+  //       .then(data => {
+  //         if (!data) return this.handleError('Invalid Username', callback);
+  //       }, err => {
+  //         return this.handleError('Username Taken', callback);
+  //       });
   //   }
-
-  //   var queryParams = {
-  //     search_text: opts.search_text,
-  //     count: opts.count || 1
-  //   };
-
-  //   if (opts.random) queryParams.random = true;
-  //   if (opts.cursor) queryParams.cursor = opts.cursor;
 
   //   var options = {
   //     hostname: this.apiUrl,
-  //     path: '/v1/gfycats/search',
-  //     method: 'GET',
-  //     query: queryParams
+  //     path: '/v1/users',
+  //     method: 'POST',
+  //     query: opts
   //   };
 
   //   return this._request(options, callback);
