@@ -3,30 +3,41 @@
 
 const _http = require('./util/_http');
 const qs = require('querystring');
+const tokenSymbol = Symbol();
 
 /**
- *  Gfycat API wrapper
+ *  Gfycat API wrapper class
  */
 class Gfycat {
+
+  /**
+   *  Create a Gfycat SDK object.
+   *  @param {string} clientId - Client id retrieved from the developers portal.
+   *  @param {string} clientSecret - Client secret retrieved from the developers portal.
+   */
   constructor(clientId, clientSecret) {
     this.apiUrl = 'api.gfycat.com';
     this.clientId = clientId || '2_Uu0k2J';
     this.clientSecret = clientSecret || 'Fo-QAvj4ijte_2b_jBNnX_kU-mI_u4K85LEPlrC8P4krc1LtaLTZkczGWq5Nj1Dl';
     this.promiseSupport = typeof Promise !== 'undefined';
-    this.token = '';
+    this[tokenSymbol] = '';
   }
 
+
   /**
-   *  Authenticate
+   *  Authenticate using client id and secret, and store the retrieved access token in the class instance to be used implicitly by other methods.
+   *  @callback {callback} [callback] - Optional callback function to be executed upon API response.
+   *  @return {}
    */
   authenticate(callback) {
-    var postData = {
+    let postData = {
       grant_type : 'client_credentials',
       client_id : this.clientId,
-      client_secret : this.clientSecret
+      client_secret : this.clientSecret,
+      scope: 'scope' // Currently does not do anything
     };
 
-    var options = {
+    let options = {
       hostname: this.apiUrl,
       path: '/v1/oauth/token',
       method: 'POST',
@@ -38,7 +49,7 @@ class Gfycat {
         if (err) {
           return callback(err);
         } else {
-          this.token = data.access_token
+          this[tokenSymbol] = data.access_token
           return callback(null, data);
         }
       });
@@ -49,7 +60,7 @@ class Gfycat {
         this._request(options, (err, data) => {
           if (err) reject(err);
           else {
-            this.token = data.access_token;
+            this[tokenSymbol] = data.access_token;
             resolve(data);
           }
         });
@@ -60,6 +71,8 @@ class Gfycat {
 
   /**
    *  Search
+   *
+   *  @param {Object}  
    */
   search(opts, callback) {
     var queryParams = {
@@ -84,8 +97,7 @@ class Gfycat {
   /**
    *  Trending
    */
-  trendingGifs(opts, callback) {
-    if (!opts) opts = {};
+  trendingGifs(opts = {}, callback) {
     if (!("count" in opts)) opts.count = 1;
 
     var options = {
@@ -165,7 +177,7 @@ class Gfycat {
       'Accept-Encoding': 'gzip,deflate'
     };
 
-    if (this.token) headers.Authorization = 'Bearer ' + this.token;
+    if (this[tokenSymbol]) headers.Authorization = 'Bearer ' + this[tokenSymbol];
 
     if (options.headers) {
       headers = Object.assign(headers, options.headers);
