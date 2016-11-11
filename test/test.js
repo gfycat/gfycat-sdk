@@ -99,8 +99,9 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should resolve with errorMessage: \'No search results\'', done => {
+        let randomString = Math.random().toString(30).substring(10);
         gfycat.search({
-          search_text: 'asdfjkasdjfkajfahs'
+          search_text: randomString
         }, (err, data) => {
           expect(data).to.exist;
           expect(data).to.be.an('object');
@@ -479,7 +480,8 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should resolve with errorMessage: \'No search results\'', () => {
-        return gfycat.search({search_text: 'asdfjkasdjfkajfahs'})
+        let randomString = Math.random().toString(30).substring(10);
+        return gfycat.search({search_text: randomString})
           .then(data => {
             expect(data).to.exist;
             expect(data).to.be.an('object');
