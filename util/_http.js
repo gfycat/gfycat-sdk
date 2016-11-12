@@ -35,7 +35,11 @@ exports.request = (options, resolve, reject) => {
     });
 
     output.on('end', () => {
-      if (format !== 'html') body = JSON.parse(body);
+      if (format !== 'html') {
+        if (!body) body = {};
+        else body = JSON.parse(body);
+      } 
+      body.statusCode = res.statusCode;
 
       if (res.statusCode >= 400 && res.statusCode < 500) {
         return reject(body);

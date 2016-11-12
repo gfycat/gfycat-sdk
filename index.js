@@ -6,9 +6,15 @@ const qs = require('querystring');
 const tokenSymbol = Symbol();
 
 /**
- *  Gfycat API wrapper
+ *  Gfycat API wrapper class
  */
 class Gfycat {
+
+  /**
+   *  Create a Gfycat SDK object.
+   *  @param {string} clientId - Client id retrieved from the developers portal.
+   *  @param {string} clientSecret - Client secret retrieved from the developers portal.
+   */
   constructor(clientId, clientSecret) {
     this.apiUrl = 'api.gfycat.com';
     //TODO: either remove this client id/secret or replace it with default
@@ -18,53 +24,20 @@ class Gfycat {
     this[tokenSymbol] = '';
   }
 
-  _getToken() {
-    return this[tokenSymbol];
-  }
-
-  _setToken(token) {
-    if (token) {
-      this[tokenSymbol] = token;
-    } else {
-      throw new Error('Please provide a valid token');
-    }
-  }
 
   /**
-   *  Authenticate
-   *
-   *  @param opts
-   *    opts.grant_type {String} - grant type ('authorization_code' || 'client_credentials' || 'password')
-   *    opts.username {String} - (only required for password grant) Gfycat username
-   *    opts.password {String} - (only required for password grant) Gfycat password
-   *    opts.code {String} - (only required for authorization_code grant) Code received from Gfycat web Oauth flow
-   *    opts.redirect_uri {String} - (only required for authorization_code grant) Url to redirect to after successful login
+   *  Authenticate using client id and secret, and store the retrieved access token in the class instance to be used implicitly by other methods.
    */
-  authenticate(opts, callback) {
-    var postData = {
+  authenticate(callback) {
+    let postData = {
+      grant_type : 'client_credentials',
       client_id : this.clientId,
-      client_secret : this.clientSecret
+      client_secret : this.clientSecret,
+      scope: 'scope' // Currently does not do anything
     };
 
-    switch (opts.grant_type) {
-      case 'authorization_code':
-        postData.grant_type = 'authorization_code';
-        postData.code = opts.code;
-        postData.redirect_uri = opts.redirect_uri;
-        break;
-      case 'client_credentials':
-        postData.grant_type = 'client_credentials';
-        break;
-      case 'password':
-        postData.grant_type = 'password';
-        postData.username = opts.username;
-        postData.password = opts.password;
-        break;
-      default:
-        break;
-    }
-
-    var options = {
+    let options = {
+      hostname: this.apiUrl,
       path: '/v1/oauth/token',
       method: 'POST',
       postData: postData
@@ -75,7 +48,7 @@ class Gfycat {
         if (err) {
           return callback(err);
         } else {
-          this._setToken(data.access_token);
+          this[tokenSymbol] = data.access_token
           return callback(null, data);
         }
       });
@@ -86,7 +59,7 @@ class Gfycat {
         this._request(options, (err, data) => {
           if (err) reject(err);
           else {
-            this._setToken(data.access_token);
+            this[tokenSymbol] = data.access_token;
             resolve(data);
           }
         });
@@ -96,18 +69,76 @@ class Gfycat {
 
 
   /**
-   *  Search
+   * Checking if the username is available / username exists / username is valid
    */
-  search(opts, callback) {
-    var queryParams = {
-      search_text: opts.search_text,
-      count: opts.count || 1
+  checkUsername(opts, callback) {
+    if (!opts || typeof opts.username === 'undefined' || opts.username == null) {
+      return this.handleError('invalid username', callback);
+    }
+
+    let username = opts.username;
+
+    let path = '/v1/users/' + username;
+
+    let options = {
+      hostname: this.apiUrl,
+      path: path,
+      method: 'GET'
     };
 
-    if (opts.random) queryParams.random = true;
-    if (opts.cursor) queryParams.cursor = opts.cursor;
+    if (callback) {
+      this._request(options, (err, data) => {
+        console.log(err, data);
+        if (data) {
+          return callback(null, false);
+        } else if ([401, 403, 422].indexOf(err.statusCode) > -1) {
+          return callback(err);
+        } else if (err && err.statusCode === 404) {
+          return callback(null, true);
+        } else {
+          callback(err);
+        }
+      });
+    } 
+    
+    else {
+      return new Promise( (resolve, reject) => {
+        this._request(options, (err, data) => {
+          if (data || [401, 422].indexOf(err.statusCode) > -1) {
+            resolve(false);
+          } else if (err && err.statusCode === 404) {
+            resolve(true);
+          } else {
+            reject(err);
+          }
+        });
+      });
+    }
+  }
 
-    var options = {
+
+  /**
+   *  Search
+   *
+   *  @param {Object}  
+   */
+  search(opts, callback) {
+    if (!opts || !opts.hasOwnProperty('search_text')) {
+      return this.handleError('invalid Object', callback);
+    }
+
+    let { search_text, random, count, cursor, first } = opts;
+
+    let queryParams = {
+      search_text: search_text,
+      count: count || 1
+    };
+
+    if (random) queryParams.random = true;
+    if (cursor) queryParams.cursor = cursor;
+
+    let options = {
+      hostname: this.apiUrl,
       path: '/v1/gfycats/search',
       method: 'GET',
       query: queryParams
@@ -118,20 +149,75 @@ class Gfycat {
 
 
   /**
-   *  Trending
+   * Get User info by ID
    */
-  trendingGifs(tag, count = 1, cursor, callback) {
-    var queryParams = {
-      count: count
+  getUserDetails(userID, callback) {
+    if (typeof userID === 'undefined' || userID == null) {
+      return this.handleError('invalid userID', callback);
+    }
+
+    var path = '/v1/users/' + userID;
+
+    var options = {
+      hostname: this.apiUrl,
+      path: path,
+      method: 'GET'
     };
 
-    if (tag) queryParams.tagName = tag;
-    if (cursor) queryParams.cursor = cursor;
+    return this._request(options, callback);
+  }
+
+
+  /**
+   * Get Gfy info by ID
+   */
+  getGifDetails(gfyID, callback) {
+    if (typeof gfyID === 'undefined' || gfyID == null) {
+      return this.handleError('invalid gfyID', callback);
+    }
+
+    var path = '/v1test/gfycats/' + gfyID;
+
+    var options = {
+      hostname: this.apiUrl,
+      path: path,
+      method: 'GET'
+    };
+
+    return this._request(options, callback);
+  }
+
+
+  /**
+   * User feed 
+   */
+  userFeed(userID, callback) {
+    if (typeof userID === 'undefined' || userID == null) {
+      return this.handleError('invalid gfyID', callback);
+    }
+
+    var path = '/v1/users/' + userID + '/gfycats';
+
+    var options = {
+      hostname: this.apiUrl,
+      path: path,
+      method: 'GET'
+    };
+
+    return this._request(options, callback);
+  }
+
+
+  /**
+   *  Trending
+   */
+  trendingGifs(opts = {}, callback) {
+    if (!("count" in opts)) opts.count = 1;
 
     var options = {
       path: '/v1/gfycats/trending',
       method: 'GET',
-      query: queryParams
+      query: opts
     };
 
     return this._request(options, callback);
@@ -141,21 +227,16 @@ class Gfycat {
   /**
    *  Trending tags
    */
-  trendingTags(tagCount = 1, gifCount = 1, populated = false, cursor, callback) {
-    var queryParams = {
-      tagCount: tagCount,
-      gfyCount: gifCount
-    };
-
+  trendingTags(opts, callback) {
     var path = '/v1/tags/trending';
-
-    if (cursor) queryParams.cursor = cursor;
-    if (populated) path += '/populated';
+    if (!opts) opts = {};
+    if (opts.populated) path += '/populated';
+    // if (cursor) queryParams.cursor = cursor;
 
     var options = {
       path: path,
       method: 'GET',
-      query: queryParams
+      query: opts
     };
 
     return this._request(options, callback);
@@ -163,10 +244,10 @@ class Gfycat {
 
 
   /**
-   *  Upload
+   *  Upload by URL
    */
   upload(opts, callback) {
-    //TODO: Add validation logic for options object
+    if (!opts) return this.handleError('invalid Object', callback);
 
     var options = {
       path: '/v1/gfycats',
@@ -188,6 +269,12 @@ class Gfycat {
     };
 
     return this._request(options, callback);
+  }
+
+
+  handleError(message, callback) {
+    if (callback) return callback(new Error(message));
+    else return Promise.reject(new Error(message));
   }
 
 
