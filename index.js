@@ -273,10 +273,6 @@ class Gfycat {
     return this._request(options, callback);
   }
 
-  handleError(message, callback) {
-    if (callback) return callback(new Error(message));
-    else return Promise.reject(new Error(message));
-  }
 
   handleError(message, callback) {
     if (callback) return callback(new Error(message));
