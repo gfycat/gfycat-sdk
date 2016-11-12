@@ -16,11 +16,7 @@ describe('Gfycat JS SDK', () => {
 
       it('should callback with err', done => {
         let gfycat = new Gfycat('asdf', 'asdf');
-        var options = {
-          grant_type: 'client_credentials'
-        };
-
-        gfycat.authenticate(options, (err, res) => {
+        gfycat.authenticate( (err, res) => {
           expect(err).to.exist;
           done();
         });
@@ -362,11 +358,7 @@ describe('Gfycat JS SDK', () => {
 
       it('should reject with error', () => {
         let gfycat = new Gfycat('asdf', 'asdf');
-        var options = {
-          grant_type: 'client_credentials'
-        };
-
-        return gfycat.authenticate(options)
+        return gfycat.authenticate()
           .then(data => {
             expect(data).to.not.exist;
           }, err => {
@@ -376,11 +368,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should resolve with access token', () => {
-        var options = {
-          grant_type: 'client_credentials'
-        };
-
-        return gfycat.authenticate(options)
+        return gfycat.authenticate()
           .then(data => {
             expect(data).to.exist;
             expect(data).to.be.a('object');

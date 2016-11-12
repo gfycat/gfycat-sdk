@@ -27,6 +27,8 @@ class Gfycat {
 
   /**
    *  Authenticate using client id and secret, and store the retrieved access token in the class instance to be used implicitly by other methods.
+   *  @callback {callback} [callback] - Optional callback function to be executed upon API response.
+   *  @return {}
    */
   authenticate(callback) {
     let postData = {
@@ -231,7 +233,7 @@ class Gfycat {
     var path = '/v1/tags/trending';
     if (!opts) opts = {};
     if (opts.populated) path += '/populated';
-    // if (cursor) queryParams.cursor = cursor;
+    // if (opts.cursor) queryParams.cursor = cursor;
 
     var options = {
       path: path,
@@ -271,6 +273,10 @@ class Gfycat {
     return this._request(options, callback);
   }
 
+  handleError(message, callback) {
+    if (callback) return callback(new Error(message));
+    else return Promise.reject(new Error(message));
+  }
 
   handleError(message, callback) {
     if (callback) return callback(new Error(message));
