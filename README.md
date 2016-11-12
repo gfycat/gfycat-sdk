@@ -37,10 +37,65 @@ gfycat.authenticate().then(data => {
 ```
 
 ### Search
-Returns a promise that resolves to a gfycats object.
+Returns a promise that resolves to a gfycats object. API supports pagination using cursors and count/first.
+The random attribute will randomize the result returned by the API - use only with count: 1 and no pagination.
 
 ```javascript
-gfycat.search('hello').then(data => {
+let options = {
+  search_text: 'hello',
+  count: 20,
+  first: 30,
+  random: false
+};
+
+gfycat.search(options).then(data => {
   console.log('gfycats', data);
 });
+```
+
+### Get User Details
+Returns user account information by username
+
+```javascript
+gfycat.getUserDetails('USERNAME').then(data => {
+  console.log(data);
+});
+```
+
+### Get Gfycat Details
+Return Gfycat json by gfycat name
+
+```javascript
+gfycat.getGifDetails('richpepperyferret').then(data => console.log(data))
+```
+
+### Get User Feed
+Return the gfycats uploaded and shared by a given username.
+
+```javascript
+gfycat.userFeed('USERNAME').then(data => console.log(data))
+```
+
+### Get Trending GIFs
+Return JSON of currently trending gifs
+
+```javascript
+let options = {
+  count: 10,
+  cursor: ''
+}
+
+gfycat.trendingGifs(options).then(data => console.log(data))
+```
+
+### Get Trending Tags
+Return JSON of currently trending tags
+
+```javascript
+let options = {
+  count: 10,
+  populated: false
+}
+
+gfycat.trendingTags(options).then(data => console.log(data))
 ```
