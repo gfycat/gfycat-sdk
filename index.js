@@ -5,6 +5,7 @@ const _http = require('./util/_http');
 const qs = require('querystring');
 const tokenSymbol = Symbol();
 
+
 /**
  *  Gfycat API wrapper class
  */
@@ -68,26 +69,32 @@ class Gfycat {
     }
   }
 
+
   /**
    * Checking if the username is available / username exists / username is valid
    */
-  checkUsername(username, callback) {
-    if (typeof username === 'undefined' || username == null) {
+  checkUsername(opts, callback) {
+    if (!opts || typeof opts.username === 'undefined' || opts.username == null) {
       return this.handleError('invalid username', callback);
     }
 
-    var path = '/v1/users/' + username;
+    let username = opts.username;
 
-    var options = {
+    let path = '/v1/users/' + username;
+
+    let options = {
       hostname: this.apiUrl,
       path: path,
-      method: 'HEAD'
+      method: 'GET'
     };
 
     if (callback) {
       this._request(options, (err, data) => {
-        if (data || [401, 422].indexOf(err.statusCode) > -1) {
+        console.log(err, data);
+        if (data) {
           return callback(null, false);
+        } else if ([401, 403, 422].indexOf(err.statusCode) > -1) {
+          return callback(err);
         } else if (err && err.statusCode === 404) {
           return callback(null, true);
         } else {
@@ -145,6 +152,7 @@ class Gfycat {
   //   return this._request(options, callback);
   // }
 
+
   /**
    *  Search
    *
@@ -155,15 +163,17 @@ class Gfycat {
       return this.handleError('invalid Object', callback);
     }
 
-    var queryParams = {
-      search_text: opts.search_text,
-      count: opts.count || 1
+    let { search_text, random, count, cursor, first } = opts;
+
+    let queryParams = {
+      search_text: search_text,
+      count: count || 1
     };
 
-    if (opts.random) queryParams.random = true;
-    if (opts.cursor) queryParams.cursor = opts.cursor;
+    if (random) queryParams.random = true;
+    if (cursor) queryParams.cursor = cursor;
 
-    var options = {
+    let options = {
       hostname: this.apiUrl,
       path: '/v1/gfycats/search',
       method: 'GET',
@@ -172,6 +182,7 @@ class Gfycat {
 
     return this._request(options, callback);
   }
+
 
   /**
    * Get User info by ID
@@ -192,6 +203,7 @@ class Gfycat {
     return this._request(options, callback);
   }
 
+
   /**
    * Get Gfy info by ID
    */
@@ -211,6 +223,10 @@ class Gfycat {
     return this._request(options, callback);
   }
 
+
+  /**
+   * User feed 
+   */
   userFeed(userID, callback) {
     if (typeof userID === 'undefined' || userID == null) {
       return this.handleError('invalid gfyID', callback);
@@ -226,6 +242,7 @@ class Gfycat {
 
     return this._request(options, callback);
   }
+
 
   /**
    *  Trending

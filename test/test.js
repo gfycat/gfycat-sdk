@@ -37,8 +37,7 @@ describe('Gfycat JS SDK', () => {
     describe('#checkUsername()', () => {
       it('should be false with \'401 Unauthorized\' (Invalid Token)', done => {
         let noAuth = new Gfycat();
-        noAuth.checkUsername('ricardricard'
-        , (err, data) => {
+        noAuth.checkUsername({username: 'ricardricard'}, (err, data) => {
           expect(data).to.be.false;
           expect(err).to.not.exist;
           done();
@@ -46,8 +45,9 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should be true with \'404 not found\' (Username Available)', done => {
-        gfycat.checkUsername('sdkfhajk'
-        , (err, data) => {
+        let randomString = Math.random().toString(30).substring(10);
+        gfycat.checkUsername({username: randomString}, (err, data) => {
+          console.log('check name', data);
           expect(data).to.be.true;
           expect(err).to.not.exist;
           done();
@@ -55,8 +55,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should be false with \'2** No Content\' (Username Unavailable)', done => {
-        gfycat.checkUsername('ricardricard'
-        , (err, data) => {
+        gfycat.checkUsername({username: 'ricardricard'}, (err, data) => {
           expect(data).to.be.false;
           expect(err).to.not.exist;
           done();
@@ -64,8 +63,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should return an \'Invalid Username\' error', done => {
-        gfycat.checkUsername(null
-        , (err, data) => {
+        gfycat.checkUsername(null, (err, data) => {
           expect(data).to.not.exist;
           expect(err).to.be.instanceof(Error);
           done();
@@ -196,8 +194,7 @@ describe('Gfycat JS SDK', () => {
 
     describe('#userFeed()', () => {
       it('should resolve with user feed', done => {
-        gfycat.userFeed('henrytest'
-        , (err, data) => {
+        gfycat.userFeed('kngroo', (err, data) => {
           expect(data).to.be.an('object');
           expect(data).to.include.keys('gfycats', 'cursor');
           expect(data.gfycats).to.be.an('array');
@@ -207,8 +204,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should return an \'invalid gfyID\' error', done => {
-        gfycat.userFeed(null
-        , (err, data) => {
+        gfycat.userFeed(null, (err, data) => {
           expect(data).to.not.exist;
           expect(err).to.be.instanceof(Error);
           done();
@@ -385,7 +381,7 @@ describe('Gfycat JS SDK', () => {
     describe('#checkUsername()', () => {
       it('should be false with \'401 Unauthorized\' (Invalid Token)', () => {
         let noAuth = new Gfycat();
-        return noAuth.checkUsername('ricardricard')
+        return noAuth.checkUsername({username: 'ricardricard'})
         .then(data => {
           expect(data).to.be.false;
         }, err => {
@@ -394,7 +390,8 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should be true with \'404 not found\' (Username Available)', () => {
-        return gfycat.checkUsername('sdkfhajk')
+        let randomString = Math.random().toString(30).substring(10);
+        return gfycat.checkUsername({username: randomString})
         .then(data => {
           expect(data).to.be.true;
         }, err => {
@@ -403,7 +400,7 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should be false with \'2** No Content\' (Username Unavailable)', () => {
-        return gfycat.checkUsername('ricardricard')
+        return gfycat.checkUsername({username: 'ricardricard'})
         .then(data => {
           expect(data).to.be.false;
         }, err => {
