@@ -1,25 +1,24 @@
 /*jslint node: true */
-'use strict';
 
-const _http = require('./util/_http');
-const qs = require('querystring');
+import _http from './util/_http'
+import qs from 'querystring'
+
 const tokenSymbol = Symbol();
-
 
 /**
  *  Gfycat API wrapper class
  */
-class Gfycat {
+export default class Gfycat {
 
   /**
    *  Create a Gfycat SDK object.
    *  @param {string} clientId - Client id retrieved from the developers portal.
    *  @param {string} clientSecret - Client secret retrieved from the developers portal.
    */
-  constructor(clientId, clientSecret) {
+  constructor({clientId, clientSecret} = {}) {
     this.apiUrl = 'api.gfycat.com';
-    this.clientId = clientId || '2_Uu0k2J';
-    this.clientSecret = clientSecret || 'Fo-QAvj4ijte_2b_jBNnX_kU-mI_u4K85LEPlrC8P4krc1LtaLTZkczGWq5Nj1Dl';
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
     this.promiseSupport = typeof Promise !== 'undefined';
     this[tokenSymbol] = '';
   }
@@ -90,7 +89,6 @@ class Gfycat {
 
     if (callback) {
       this._request(options, (err, data) => {
-        console.log(err, data);
         if (data) {
           return callback(null, false);
         } else if ([401, 403, 422].indexOf(err.statusCode) > -1) {
@@ -425,4 +423,3 @@ class Gfycat {
 
 }
 
-module.exports = Gfycat;
