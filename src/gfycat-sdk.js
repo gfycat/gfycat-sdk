@@ -1,25 +1,24 @@
 /*jslint node: true */
-'use strict';
 
-const _http = require('./util/_http');
-const qs = require('querystring');
+import _http from './util/_http'
+import qs from 'querystring'
+
 const tokenSymbol = Symbol();
 
 /**
  *  Gfycat API wrapper class
  */
-class Gfycat {
+export default class Gfycat {
 
   /**
    *  Create a Gfycat SDK object.
    *  @param {string} clientId - Client id retrieved from the developers portal.
    *  @param {string} clientSecret - Client secret retrieved from the developers portal.
    */
-  constructor(clientId, clientSecret) {
+  constructor({clientId, clientSecret} = {}) {
     this.apiUrl = 'api.gfycat.com';
-    //TODO: either remove this client id/secret or replace it with default
-    this.clientId = clientId || '2_Uu0k2J';
-    this.clientSecret = clientSecret || 'Fo-QAvj4ijte_2b_jBNnX_kU-mI_u4K85LEPlrC8P4krc1LtaLTZkczGWq5Nj1Dl';
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
     this.promiseSupport = typeof Promise !== 'undefined';
     this[tokenSymbol] = '';
   }
@@ -73,12 +72,10 @@ class Gfycat {
   /**
    * Checking if the username is available / username exists / username is valid
    */
-  checkUsername(opts, callback) {
-    if (!opts || typeof opts.username === 'undefined' || opts.username == null) {
+  checkUsername({username = ''} = {}, callback) {
+    if (typeof username === 'undefined' || !username || username.length === 0) {
       return this.handleError('invalid username', callback);
     }
-
-    let username = opts.username;
 
     let path = '/v1/users/' + username;
 
@@ -90,18 +87,17 @@ class Gfycat {
 
     if (callback) {
       this._request(options, (err, data) => {
-        console.log(err, data);
         if (data) {
           return callback(null, false);
-        } else if ([401, 403, 422].indexOf(err.statusCode) > -1) {
-          return callback(err);
-        } else if (err && err.statusCode === 404) {
-          return callback(null, true);
         } else {
-          callback(err);
-        }
+          if ([401, 403, 422].indexOf(err.statusCode) > -1) {
+            return callback(err);
+          } else { 
+            return callback(null, true);
+          }        
+        }       
       });
-    } 
+    }
     
     else {
       return new Promise( (resolve, reject) => {
@@ -124,20 +120,19 @@ class Gfycat {
    *
    *  @param {Object}  
    */
-  search(opts, callback) {
-    if (!opts || !opts.hasOwnProperty('search_text')) {
-      return this.handleError('invalid Object', callback);
+  search({search_text, random = false, count = 1, cursor, first} = {}, callback) {
+    if (typeof search_text === 'undefined') {
+      return this.handleError('Please specify a search term', callback);
     }
-
-    let { search_text, random, count, cursor, first } = opts;
 
     let queryParams = {
       search_text: search_text,
-      count: count || 1
+      count: count
     };
 
     if (random) queryParams.random = true;
     if (cursor) queryParams.cursor = cursor;
+    if (first) queryParams.first = first;
 
     let options = {
       hostname: this.apiUrl,
@@ -335,4 +330,3 @@ class Gfycat {
 
 }
 
-module.exports = Gfycat;
