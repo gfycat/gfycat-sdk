@@ -9,13 +9,22 @@ const fs = require('fs');
 describe('Gfycat JS SDK', () => {
 
   describe('Callback based response', () => {
- 
-    let gfycat = new Gfycat();
+    let opts = {
+      clientId: '2_Uu0k2J',
+      clientSecret: 'Fo-QAvj4ijte_2b_jBNnX_kU-mI_u4K85LEPlrC8P4krc1LtaLTZkczGWq5Nj1Dl'
+    };
+    let gfycat = new Gfycat(opts);
 
     describe('#authenticate()', () => {
 
       it('should callback with err', done => {
-        let gfycat = new Gfycat('asdf', 'asdf');
+        let opts = { 
+          clientId: 'asdf',
+          clientSecret: 'asdf'
+        };
+
+        let gfycat = new Gfycat(opts);
+
         gfycat.authenticate( (err, res) => {
           expect(err).to.exist;
           done();
@@ -35,11 +44,16 @@ describe('Gfycat JS SDK', () => {
     });
 
     describe('#checkUsername()', () => {
-      it('should be false with \'401 Unauthorized\' (Invalid Token)', done => {
-        let noAuth = new Gfycat();
-        noAuth.checkUsername({username: 'ricardricard'}, (err, data) => {
-          expect(data).to.be.false;
-          expect(err).to.not.exist;
+      it('should callback error with \'401 Unauthorized\' (Invalid Token)', done => {
+        let gfycat = new Gfycat();
+        gfycat.checkUsername({username: 'ricardricard'}, (err, data) => {
+          expect(data).to.not.exist;
+          expect(err).to.exist;
+          expect(err).to.contain.keys('errorMessage', 'statusCode');
+          expect(err.errorMessage).to.contain.keys('code', 'description');
+          expect(err.errorMessage.code).to.equal('Unauthorized');
+          expect(err.errorMessage.description).to.equal('Not authorized to access this endpoint');
+          expect(err.statusCode).to.equal(401);
           done();
         });
       });
@@ -62,9 +76,9 @@ describe('Gfycat JS SDK', () => {
       });
 
       it('should return an \'Invalid Username\' error', done => {
-        gfycat.checkUsername(null, (err, data) => {
+        gfycat.checkUsername({username: null}, (err, data) => {
           expect(data).to.not.exist;
-          expect(err).to.be.instanceof(Error);
+          expect(err).to.exist;
           done();
         });
       });
@@ -131,26 +145,23 @@ describe('Gfycat JS SDK', () => {
       // Will sometimes fail due to search API updating in real time
       // and because promises are asynchronous
       it('should have paging with search cursor', done => {
-        gfycat.search({
+        let opts = {
           search_text: 'cats'
-        }, (err, data) => {
-          expect(data.cursor).to.be.a('string');
-          gfycat.search({
-            cursor: data.cursor,
+        };
+
+        gfycat.search(opts, (err, data) => {
+          expect(data.gfycats).to.exist;
+          expect(data.cursor).to.exist;
+
+          let opts = {
             search_text: 'cats',
-            count:1
-          }, (err1, data1) => {
-            expect(data1.cursor).to.be.a('string');
-            expect(data1.gfycats.length).to.equal(1);
-            gfycat.search({
-              cursor: data.cursor,
-              search_text: 'cats',
-              count:2
-            }, (err2, data2) => {
-              expect(data2.gfycats.length).to.equal(2);
-              // expect(data1.gfycats[0]).to.deep.equal(data2.gfycats[0]);
-              done();
-            });
+            cursor: data.cursor
+          };
+
+          gfycat.search(opts, (err, data) => {
+            expect(data.gfycats).to.exist;
+            expect(data.cursor).to.exist;
+            done();
           });
         });
       });
@@ -339,7 +350,12 @@ describe('Gfycat JS SDK', () => {
 
   describe('Promise based response', () => {
 
-    let gfycat = new Gfycat();
+    let opts = {
+      clientId: '2_Uu0k2J',
+      clientSecret: 'Fo-QAvj4ijte_2b_jBNnX_kU-mI_u4K85LEPlrC8P4krc1LtaLTZkczGWq5Nj1Dl'
+    };
+
+    let gfycat = new Gfycat(opts);
 
     describe('#authenticate()', () => {
       // it('should reject with Unauthorized error', () => {
@@ -486,9 +502,7 @@ describe('Gfycat JS SDK', () => {
             expect(err).to.not.exist;
           });
       });
-
-      it('should resolve with errorMessage:' + 
-        '\'search_text is a required parameter for search\'', () => {
+it('should resolve with errorMessage:' + '\'search_text is a required parameter for search\'', () => {
         return gfycat.search({search_text: ''})
           .then(data => {
             expect(data).to.not.exist;
@@ -500,28 +514,26 @@ describe('Gfycat JS SDK', () => {
 
       // Will not error because Promise.all call both at the same time
       it('should have paging with search cursor', () => {
-        return gfycat.search({search_text: 'cats'})
-          .then(data => {
-            expect(data.cursor).to.be.a('string');
-            var a = gfycat.search({
-              cursor: data.cursor,
-              search_text: 'cats',
-              count: 1
-            });
-            var b = gfycat.search({
-              cursor: data.cursor,
-              search_text: 'cats',
-              count: 2
-            });
+        let opts = {
+          search_text: 'cats',
+          count: '2'
+        };
 
-            return Promise.all([a,b]).then(function(values) {
-              expect(values[0].cursor).to.be.a('string');
-              expect(values[0].gfycats.length).to.equal(1);
-              expect(values[1].gfycats.length).to.equal(2);
-              // expect(values[0].gfycats[0]).to.deep.equal(values[1].gfycats[0]);
-            });
+        let promises = [];
+
+        return gfycat.search(opts)
+          .then(data => {
+            expect(data.gfycats).to.exist;
+            expect(data.cursor).to.be.a('string');
+            opts.cursor = data.cursor;
+            return gfycat.search(opts);
+          })
+          .then(data => {
+            expect(data.gfycats).to.exist;
+            expect(data.cursor).to.be.a('string');
           });
       });
+
     }); 
 
     /*describe('#upload()', () => {

@@ -72,12 +72,10 @@ export default class Gfycat {
   /**
    * Checking if the username is available / username exists / username is valid
    */
-  checkUsername(opts, callback) {
-    if (!opts || typeof opts.username === 'undefined' || opts.username == null) {
+  checkUsername({username = ''} = {}, callback) {
+    if (typeof username === 'undefined' || !username || username.length === 0) {
       return this.handleError('invalid username', callback);
     }
-
-    let username = opts.username;
 
     let path = '/v1/users/' + username;
 
@@ -91,15 +89,15 @@ export default class Gfycat {
       this._request(options, (err, data) => {
         if (data) {
           return callback(null, false);
-        } else if ([401, 403, 422].indexOf(err.statusCode) > -1) {
-          return callback(err);
-        } else if (err && err.statusCode === 404) {
-          return callback(null, true);
         } else {
-          callback(err);
-        }
+          if ([401, 403, 422].indexOf(err.statusCode) > -1) {
+            return callback(err);
+          } else { 
+            return callback(null, true);
+          }        
+        }       
       });
-    } 
+    }
     
     else {
       return new Promise( (resolve, reject) => {
@@ -156,20 +154,19 @@ export default class Gfycat {
    *
    *  @param {Object}  
    */
-  search(opts, callback) {
-    if (!opts || !opts.hasOwnProperty('search_text')) {
-      return this.handleError('invalid Object', callback);
+  search({search_text, random = false, count = 1, cursor, first} = {}, callback) {
+    if (typeof search_text === 'undefined') {
+      return this.handleError('Please specify a search term', callback);
     }
-
-    let { search_text, random, count, cursor, first } = opts;
 
     let queryParams = {
       search_text: search_text,
-      count: count || 1
+      count: count
     };
 
     if (random) queryParams.random = true;
     if (cursor) queryParams.cursor = cursor;
+    if (first) queryParams.first = first;
 
     let options = {
       hostname: this.apiUrl,
