@@ -36,8 +36,17 @@ exports.request = (options, resolve, reject) => {
 
     output.on('end', () => {
       if (format !== 'html') {
-        if (!body) body = {};
-        else body = JSON.parse(body);
+        if (typeof body === 'undefined' || !body) {
+          body = {};
+        } else {
+          try {
+            body = JSON.parse(body);
+          } catch (e) {
+            console.log('error parsing json', e);
+            console.log('body', body);
+            body = body;
+          }
+        }
       } 
       body.statusCode = res.statusCode;
 
