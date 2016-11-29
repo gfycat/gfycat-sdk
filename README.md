@@ -3,7 +3,7 @@
 
 [![Build Status](https://api.travis-ci.org/kngroo/gfycat-sdk.svg?branch=master)](https://travis-ci.org/kngroo/gfycat-sdk)
 
-Javascript API wrapper for [Gfycat.com](https://gfycat.com) [API](https://developers.gfycat.com) that supports **promises**.
+Javascript API wrapper for [Gfycat.com](https://gfycat.com) [API](https://developers.gfycat.com) that supports **callbacks** and **promises**.
 
 
 ## Installation
@@ -17,14 +17,14 @@ Obtain a client_id and client_secret for your integration from the [Gfycat devel
 ```javascript
 const Gfycat = require('gfycat-sdk');
 
-var gfycat = new Gfycat(client_id, client_secret);
+var gfycat = new Gfycat({client_id: YOUR_CLIENT_ID, client_secret: YOUR_CLIENT_SECRET});
 ```
 
 **For security reasons, we suggest storing the client id and secret in a secure location.**
 
 
 ## Methods
-Currently supported:
+
 ### Authenticate
 Returns a promise that resolves to the api authentication token that is valid for 1 hour
 
