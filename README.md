@@ -26,12 +26,22 @@ var gfycat = new Gfycat({client_id: YOUR_CLIENT_ID, client_secret: YOUR_CLIENT_S
 ## Methods
 
 ### Authenticate
-Returns a promise that resolves to the api authentication token that is valid for 1 hour
+Returns a callback, or promise that resolves to the api authentication token that is valid for 1 hour
 
+Callback
 ```javascript
-gfycat.authenticate().then(data => {
+gfycat.authenticate((err, data) => {
   //Your app is now authenticated
-  assert.equal(data, gfycat.token);
+  assert.equal(data.access_token, gfycat.token);
+  console.log('token', gfycat.token);
+})
+```
+
+Promise
+```javascript
+gfycat.authenticate().then(res => {
+  //Your app is now authenticated
+  assert.equal(res.access_token, gfycat.token);
   console.log('token', gfycat.token);
 });
 ```
