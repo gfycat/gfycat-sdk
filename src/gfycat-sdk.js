@@ -17,10 +17,12 @@ export default class Gfycat {
    */
   constructor({clientId, clientSecret} = {}) {
     this.apiUrl = 'api.gfycat.com';
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
+    this.apiVersion = '/v1';
     this.promiseSupport = typeof Promise !== 'undefined';
     this[tokenSymbol] = '';
+
+    if (!!clientId) this.clientId = clientId;
+    if (!!clientSecret) this.clientSecret = clientSecret;
   }
 
 
@@ -38,8 +40,7 @@ export default class Gfycat {
     };
 
     let options = {
-      hostname: this.apiUrl,
-      path: '/v1/oauth/token',
+      path: '/oauth/token',
       method: 'POST',
       postData: postData
     };
@@ -77,11 +78,8 @@ export default class Gfycat {
       return this.handleError('invalid username', callback);
     }
 
-    let path = '/v1/users/' + username;
-
     let options = {
-      hostname: this.apiUrl,
-      path: path,
+      path: '/users/' + username,
       method: 'GET'
     };
 
@@ -122,7 +120,11 @@ export default class Gfycat {
    */
   search({search_text, random = false, count = 1, cursor, first} = {}, callback) {
     if (typeof search_text === 'undefined') {
-      return this.handleError('Please specify a search term', callback);
+      return this.handleError('Please specify a search_text attribute.', callback);
+    }
+
+    if (!!cursor && !!first) {
+      return this.handleError('Please do not specify both cursor and first attributes. Only use one or the other.', callback);
     }
 
     let queryParams = {
@@ -135,8 +137,7 @@ export default class Gfycat {
     if (first) queryParams.first = first;
 
     let options = {
-      hostname: this.apiUrl,
-      path: '/v1/gfycats/search',
+      path: '/gfycats/search',
       method: 'GET',
       query: queryParams
     };
@@ -148,16 +149,13 @@ export default class Gfycat {
   /**
    * Get User info by ID
    */
-  getUserDetails(userID, callback) {
-    if (typeof userID === 'undefined' || userID == null) {
-      return this.handleError('invalid userID', callback);
+  getUserDetails({userId} = {}, callback) {
+    if (typeof userId === 'undefined' || userId === null || userId.length === 0) {
+      return this.handleError('invalid userId', callback);
     }
 
-    var path = '/v1/users/' + userID;
-
-    var options = {
-      hostname: this.apiUrl,
-      path: path,
+    let options = {
+      path: '/users/' + userId,
       method: 'GET'
     };
 
@@ -168,16 +166,13 @@ export default class Gfycat {
   /**
    * Get Gfy info by ID
    */
-  getGifDetails(gfyID, callback) {
-    if (typeof gfyID === 'undefined' || gfyID == null) {
-      return this.handleError('invalid gfyID', callback);
+  getGifDetails({gfyId} = {}, callback) {
+    if (typeof gfyId === 'undefined' || gfyId === null || gfyId.length === 0) {
+      return this.handleError('invalid gfyId', callback);
     }
 
-    var path = '/v1test/gfycats/' + gfyID;
-
-    var options = {
-      hostname: this.apiUrl,
-      path: path,
+    let options = {
+      path: '/gfycats/' + gfyId,
       method: 'GET'
     };
 
@@ -188,16 +183,13 @@ export default class Gfycat {
   /**
    * User feed 
    */
-  userFeed(userID, callback) {
-    if (typeof userID === 'undefined' || userID == null) {
-      return this.handleError('invalid gfyID', callback);
+  userFeed({userId} = {}, callback) {
+    if (typeof userId === 'undefined' || userId === null || userId.length === 0) {
+      return this.handleError('invalid gfyId', callback);
     }
 
-    var path = '/v1/users/' + userID + '/gfycats';
-
-    var options = {
-      hostname: this.apiUrl,
-      path: path,
+    let options = {
+      path: '/users/' + userId + '/gfycats',
       method: 'GET'
     };
 
@@ -208,13 +200,12 @@ export default class Gfycat {
   /**
    *  Trending
    */
-  trendingGifs(opts = {}, callback) {
-    if (!("count" in opts)) opts.count = 1;
+  trendingGifs({count = 1} = {}, callback) {
 
     var options = {
-      path: '/v1/gfycats/trending',
+      path: '/gfycats/trending',
       method: 'GET',
-      query: opts
+      query: {count: count}
     };
 
     return this._request(options, callback);
@@ -225,12 +216,12 @@ export default class Gfycat {
    *  Trending tags
    */
   trendingTags(opts, callback) {
-    var path = '/v1/tags/trending';
+    let path = '/tags/trending';
     if (!opts) opts = {};
     if (opts.populated) path += '/populated';
     // if (opts.cursor) queryParams.cursor = cursor;
 
-    var options = {
+    let options = {
       path: path,
       method: 'GET',
       query: opts
@@ -246,8 +237,8 @@ export default class Gfycat {
   upload(opts, callback) {
     if (!opts) return this.handleError('invalid Object', callback);
 
-    var options = {
-      path: '/v1/gfycats',
+    let options = {
+      path: '/gfycats',
       method: 'POST',
       postData: opts
     };
@@ -260,8 +251,8 @@ export default class Gfycat {
    *  Check upload status
    */
   checkUploadStatus(gfyId, callback) {
-    var options = {
-      path: '/v1/gfycats/fetch/status/' + gfyId,
+    let options = {
+      path: '/gfycats/fetch/status/' + gfyId,
       method: 'GET'
     };
 
@@ -299,7 +290,7 @@ export default class Gfycat {
     var httpOptions = {
       request: {
         hostname: this.apiUrl,
-        path: apiPath,
+        path: this.apiVersion + apiPath,
         method: options.method || 'GET',
         headers: headers
       },
