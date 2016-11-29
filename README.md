@@ -28,7 +28,7 @@ var gfycat = new Gfycat({client_id: YOUR_CLIENT_ID, client_secret: YOUR_CLIENT_S
 ### Authenticate
 Returns a callback, or promise that resolves to the api authentication token that is valid for 1 hour
 
-Callback
+#### Callback
 ```javascript
 gfycat.authenticate((err, data) => {
   //Your app is now authenticated
@@ -37,7 +37,7 @@ gfycat.authenticate((err, data) => {
 })
 ```
 
-Promise
+#### Promise
 ```javascript
 gfycat.authenticate().then(res => {
   //Your app is now authenticated
@@ -48,14 +48,13 @@ gfycat.authenticate().then(res => {
 
 ### Search
 Returns a promise that resolves to a gfycats object. API supports pagination using cursors and count/first.
-The random attribute will randomize the result returned by the API - use only with count: 1 and no pagination.
+The optional random attribute will randomize the result returned by the API - do not supply pagination attributes with this.
 
 ```javascript
 let options = {
   search_text: 'hello',
   count: 20,
-  first: 30,
-  random: false
+  first: 30
 };
 
 gfycat.search(options).then(data => {
