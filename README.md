@@ -17,7 +17,7 @@ Obtain a client_id and client_secret for your integration from the [Gfycat devel
 ```javascript
 const Gfycat = require('gfycat-sdk');
 
-var gfycat = new Gfycat({client_id: YOUR_CLIENT_ID, client_secret: YOUR_CLIENT_SECRET});
+var gfycat = new Gfycat({clientId: YOUR_CLIENT_ID, clientSecret: YOUR_CLIENT_SECRET});
 ```
 
 **For security reasons, we suggest storing the client id and secret in a secure location.**
