@@ -66,7 +66,11 @@ gfycat.search(options).then(data => {
 Returns user account information by username
 
 ```javascript
-gfycat.getUserDetails('USERNAME').then(data => {
+let options = {
+  userId: 'myUsername'
+};
+
+gfycat.getUserDetails(options).then(data => {
   console.log(data);
 });
 ```
@@ -75,14 +79,22 @@ gfycat.getUserDetails('USERNAME').then(data => {
 Return Gfycat json by gfycat name
 
 ```javascript
-gfycat.getGifDetails('richpepperyferret').then(data => console.log(data))
+let options = {
+  gfyId: 'richpepperyferret'
+};
+
+gfycat.getGifDetails(options).then(data => console.log(data))
 ```
 
 ### Get User Feed
 Return the gfycats uploaded and shared by a given username.
 
 ```javascript
-gfycat.userFeed('USERNAME').then(data => console.log(data))
+let options = {
+  userId: 'myUsername'
+};
+
+gfycat.userFeed(options).then(data => console.log(data))
 ```
 
 ### Get Trending GIFs
