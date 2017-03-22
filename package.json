@@ -6,6 +6,7 @@
   "scripts": {
     "build": "webpack",
     "compile": "babel src -d lib",
+    "dev": "python3 -m http.server | NODE_ENV=development webpack",
     "prepublish": "npm run compile",
     "test": "npm run compile && istanbul cover _mocha -- ./test.js -R spec"
   },
