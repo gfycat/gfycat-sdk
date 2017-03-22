@@ -66,7 +66,7 @@ GfycatSDK.prototype = {
       api: '/oauth',
       endpoint: '/token',
       method: 'POST',
-      postData: {
+      payload: {
         client_id: options.client_id || this.client_id,
         client_secret: options.client_secret || this.client_secret,
         grant_type: options.grant_type || 'client_credentials'
@@ -148,7 +148,7 @@ GfycatSDK.prototype = {
   *   options.api {String} - API type.
   *   options.endpoint {String} - The API method.
   *   options.method {String} - The http method to be used.
-  *   options.postData {Object} - JSON data to be sent in POST requests.
+  *   options.payload {Object} - JSON data to be sent in POST requests.
   *   options.query {Object} - (optional) Query string parameters.
   *   options.timeout {Number} - (optional) API timeout limit in milliseconds.
   * @param callback - (optional) Callback function to be invoked upon completed request.
@@ -187,7 +187,7 @@ GfycatSDK.prototype = {
       request: {
         headers: options.headers || null,
         method: options.method,
-        postData: options.postData || null,
+        payload: options.payload || null,
         url: this.apiUrl + options.api + options.endpoint + query
       },
       timeout: options.timeout || this.timeout

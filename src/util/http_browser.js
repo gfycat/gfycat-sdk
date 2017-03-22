@@ -6,7 +6,7 @@
  *   options.request {Object} - Request data
  *      request.headers {Object} - (optional) HTTP headers to be sent with the request
  *      request.method {String} - HTTP method
- *      request.postData {Object} - (optional) JSON data to be sent with POST request
+ *      request.payload {Object} - (optional) JSON data to be sent with POST request
  *      request.url {String} - API url
  *   options.timeout {Number} - (optional) Request timeout before returning an error. Defaults to 30000 milliseconds
  */
@@ -53,7 +53,7 @@ exports.request = function(options, resolve, reject) {
     })
   }
 
-  var data = JSON.stringify(options.request.postData) || null;
+  var data = JSON.stringify(options.request.payload) || null;
 
   if (!data) {
     xhr.send();
