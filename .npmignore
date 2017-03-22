@@ -1,6 +1,7 @@
 coverage
-test
+test.js
 .travis.yml
 src/
 *.html
 webpack.config.js
+yarn.lock
