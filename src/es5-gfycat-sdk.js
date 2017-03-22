@@ -43,6 +43,7 @@ var GfycatSDK = function(options) {
   }
 
   this.apiUrl = API_HOSTNAME + API_BASE_PATH;
+  this.retryLimit = 2;
 };
 
 
@@ -50,7 +51,7 @@ GfycatSDK.prototype = {
   /**
   * Retrieve Oauth token.
   *
-  * @param options {Object}
+  * @param options {Object} - (optional if id and secret were provided in constructor)
   *   options.client_id {String} - Gfycat client id.
   *   options.client_secret {String} - Gfycat client secret.
   *   options.grant_type {String} - Oauth grant type. 'client_credentials' by default.
@@ -73,27 +74,24 @@ GfycatSDK.prototype = {
     }
 
     var self = this;
-    return this._request(options, function(err, res) {
-      self.access_token = res.access_token;
 
-      if (callback) {
-        if (!err) callback(null, res);
-        else callback(err);
-      } else {
-        if (!promisesExist) {
-          throw new Error('Callback must be provided unless Promises are available');
-        }
-        return new Promise(function(resolve, reject) {
-          if (!err) {
-            console.log('resolve');
-            resolve(self.token);
-          } else {
-            console.log('reject');
-            reject(err);
-          }
-        });
-      }
-    });
+    if (callback) {
+      return this._request(options, function(err, res) {
+        if (!err) {
+          self._setToken(res);
+          callback(null, res);
+        } else callback(err);
+      })
+    } else {
+      return this._request(options)
+        .then(function(res) {
+          self._setToken(res);
+          Promise.resolve(res);
+        })
+        .catch(function(err) {
+          Promise.reject(err);
+        })
+    }
   },
 
   /**
@@ -161,7 +159,22 @@ GfycatSDK.prototype = {
     }
 
     if (typeof options === 'undefined' || !options) {
-      return _handleErr('Please provide options object', callback);
+      return _handleErr('Please provide valid options object', callback);
+    }
+
+    var counter = options.counter || 0;
+
+    if (counter >= this.retryLimit) {
+      if (callback) _handleErr('Retry limit reached', callback);
+      else return Promise.reject('Retry limit reached')
+    }
+
+    var token = this.access_token && this.token_type ?
+      this.token_type + ' ' + this.access_token : null;
+
+    if (token) {
+      if (typeof options.headers === 'undefined') options.headers = {};
+      options.headers['Authorization'] = this.access_token;
     }
 
     var query = '';
@@ -172,6 +185,7 @@ GfycatSDK.prototype = {
 
     var httpOptions = {
       request: {
+        headers: options.headers || null,
         method: options.method,
         postData: options.postData || null,
         url: this.apiUrl + options.api + options.endpoint + query
@@ -179,22 +193,58 @@ GfycatSDK.prototype = {
       timeout: options.timeout || this.timeout
     };
 
+    var self = this;
+
     if (callback) {
       var resolve = function(res) {
         callback(null, res);
       };
       var reject = function(err) {
-        callback(err);
+        if (err === 401) {
+          self.authenticate({}, function(err, res) {
+            if (err) callback(err);
+            else {
+              options.counter = counter + 1;
+              return self._request(options, callback);
+            }
+          })
+        } else {
+          callback(err);
+        }
       };
       httpService.request(httpOptions, resolve, reject);
-    } else {
-      if (!promisesExist) {
-        throw new Error('Callback must be provided unless Promises are available');
-      }
-      return new Promise(function(resolve, reject) {
-        httpService.request(httpOptions, resolve, reject);
-      });
     }
+
+    else {
+      // return new Promise(function(resolve, reject) {
+      //   httpService.request(httpOptions, resolve, reject);
+      // });
+      return new Promise(function(resolve, reject) {
+        httpService.request(httpOptions, resolve, reject)
+      })
+        .then(function(res) {
+          return Promise.resolve(res);
+        })
+        .catch(function(err) {
+          if (err === 401) {
+            return self.authenticate({})
+              .then(function(res) {
+                options.counter = counter + 1;
+                return self._request(options);
+              })
+              .catch(function(err) {
+                return Promise.reject(err);
+              });
+          } else {
+            return Promise.reject(err);
+          }
+        });
+    }
+  },
+
+  _setToken: function(options) {
+    this.access_token = options.access_token;
+    this.token_type = options.token_type;
   }
 };
 

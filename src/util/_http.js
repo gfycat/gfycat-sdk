@@ -9,13 +9,11 @@ const zlib = require('zlib');
  * @param options {Object}
  *   options.request {Object} - Request data including method, host and path
  *   options.timeout {Number} - Request timeout before returning an error. Defaults to 30000 milliseconds
- *   options.fmt {String} - Return results in html or json format (useful for viewing responses as GIFs to debug/test)
  *   options.postData {Object} - Post data to be written to request stream
  */
 
 exports.request = (options, resolve, reject) => {
   var timeout = options.timeout;
-  var format = options.fmt;
 
   var req = https.request(options.request, res => {
     switch (res.headers['content-encoding']) {
@@ -27,7 +25,7 @@ exports.request = (options, resolve, reject) => {
         var output = res;
         break;
     }
-    
+
     let body = '';
 
     output.on('data', d => {
@@ -35,24 +33,18 @@ exports.request = (options, resolve, reject) => {
     });
 
     output.on('end', () => {
-      if (format !== 'html') {
-        if (typeof body === 'undefined' || !body) {
-          body = {};
-        } else {
-          try {
-            body = JSON.parse(body);
-          } catch (e) {
-            console.log('error parsing json', e);
-            console.log('body', body);
-            body = body;
-          }
-        }
-      } 
-      body.statusCode = res.statusCode;
-
       if (res.statusCode >= 400 && res.statusCode < 500) {
         return reject(body);
       }
+
+      try {
+        body = JSON.parse(body);
+      } catch (e) {
+        body = body;
+        return reject(e);
+      }
+
+      body.statusCode = res.statusCode;
 
       return resolve(body);
     });
@@ -80,4 +72,3 @@ exports.request = (options, resolve, reject) => {
     req.end();
   }
 };
-
