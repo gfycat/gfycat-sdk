@@ -4,6 +4,7 @@
   "description": "Javascript module for gfycat.com API supporting promises and callbacks",
   "main": "lib/index.js",
   "scripts": {
+    "build": "webpack",
     "compile": "babel src -d lib",
     "prepublish": "npm run compile",
     "test": "npm run compile && istanbul cover _mocha -- ./test.js -R spec"
@@ -31,7 +32,8 @@
     "chai": "^3.5.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.1.2",
-    "sinon": "^1.17.6"
+    "sinon": "^1.17.6",
+    "webpack": "^2.2.1"
   },
   "dependencies": {}
 }
