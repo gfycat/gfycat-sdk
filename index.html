@@ -7,7 +7,20 @@
 </head>
 <body>
   <script type="text/javascript">
+    gfycat = new GfycatSDK({
+      client_id: '2_Uu0k2J',
+      client_secret: 'Fo-QAvj4ijte_2b_jBNnX_kU-mI_u4K85LEPlrC8P4krc1LtaLTZkczGWq5Nj1Dl'
+    });
 
+    gfycat.authenticate({}).then(res => {
+      gfycat._setToken({access_token: 'asdf', token_type: 'bearer'});
+      gfycat.search({search_text:'dog', count:1}).then(res => console.log('res', res)).catch(err => console.log('err', err));
+    }).catch(err => console.log('auth error', err));
+
+    // gfycat.authenticate({}, function(err, res) {
+    //   gfycat._setToken({access_token: 'asdf', token_type: 'bearer'});
+    //   gfycat.search({search_text:'dog', count:1}, (err, res) => console.log('err', err, 'res', res));
+    // })
   </script>
 </body>
 </html>
