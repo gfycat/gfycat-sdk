@@ -216,9 +216,6 @@ GfycatSDK.prototype = {
     }
 
     else {
-      // return new Promise(function(resolve, reject) {
-      //   httpService.request(httpOptions, resolve, reject);
-      // });
       return new Promise(function(resolve, reject) {
         httpService.request(httpOptions, resolve, reject)
       })
