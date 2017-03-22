@@ -46,20 +46,37 @@
             client_secret: 'Fo-QAvj4ijte_2b_jBNnX_kU-mI_u4K85LEPlrC8P4krc1LtaLTZkczGWq5Nj1Dl'
           });
 
-          gfycat.authenticate({}).then(res => {
-            gfycat.search({search_text:'nature', count:1})
-              .then(res => this.setState({gif: res.gfycats[0]}))
-              .catch(err => console.log('err', err));
-          }).catch(err => console.log('auth error', err));
+          gfycat.authenticate()
+            .then(res => {
+              gfycat.getTrending({tagName: 'funny'})
+                .then(res => console.log('trending', res))
+              gfycat.getTrendingTags()
+                .then(res => console.log('trending tags', res))
+              gfycat.getTrendingTagsPopulated()
+                .then(res => console.log('trending tags populated', res))
+              gfycat.getCategories({gfyCount: 1})
+                .then(res => this.setState({tags: res.tags}))
+              gfycat.search({search_text: 'nature'})
+                .then(res => console.log('search', res))
+            })
         }
 
     		render(props, state) {
-          const gif = state.gif ? t7`<img src="${state.gif.max1mbGif}" />` : null;
+          const tagElements = state.tags ? state.tags.map((tag) => {
+            return t7`
+              <span>
+                <h3>${tag.tag}</h3>
+                <img src="${tag.gfycats[0].max1mbGif}" />
+              </span>`
+          }) : null
 
     			return t7`
     				<div>
               <h1>Gfycat SDK Demo</h1>
-              ${gif}
+              <section>
+                <h2>Tags</h2>
+                <div>${tagElements}</div>
+              </section>
     				</div>
     			`;
     		}
