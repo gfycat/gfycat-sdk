@@ -35,10 +35,10 @@ var GfycatSDK = function(options) {
     this.client_id = options.client_id;
     this.client_secret = options.client_secret;
     this.timeout = options.timeout || 30000;
-  } /*else if (typeof options === 'undefined' || !options) {
+  } else if (typeof options === 'undefined' || !options) {
+    console.error('Although some of our API endpoints can be used without an API key, in order to get the best experience, we strongly recommend that you obtain an API key and initialize this SDK with the provided client_id and client_secret. Get your API key today by visiting https://developers.gfycat.com/signup');
     API_BASE_PATH = '/v1test';
-    options = {};
-  }*/ else {
+  } else {
     throw new Error('Please provide a valid options object with client_id and client_secret.')
   }
 
@@ -58,6 +58,7 @@ GfycatSDK.prototype = {
   * @param callback - (optional) callback function to run when the request completes.
   */
   authenticate: function(options, callback) {
+    if (!options) options = {};
     if (!(this.client_id || this.client_secret) && !(options.client_id || options.client_secret)) {
       return _handleErr('Please provide client_id and client_secret in options', callback);
     }
@@ -94,22 +95,54 @@ GfycatSDK.prototype = {
     }
   },
 
-  /**
-  * Search a single gif by gfyId.
-  *
-  * @param options Gfycat API search options
-  *   options.id {String} - search query term or phrase.
-  * @param callback - (optional) callback function to run when the request completes.
-  */
-  searchById: function(options, callback) {
-    if (typeof options === 'undefined' || !options || !options.id) {
-      return _handleErr('Please provide valid options object', callback);
-    }
+  getCategories: function getCategories(options, callback) {
+    if (!options) options = {};
+
+    return this._request({
+      api: '/reactions',
+      endpoint: '/populated',
+      method: 'GET',
+      query: {
+        gfyCount: options.gfyCount || 1
+      }
+    }, callback);
+  },
+
+  getTrending: function getTrending(options, callback) {
+    if (!options) options = {};
 
     return this._request({
       api: '/gfycats',
-      endpoint: '/' + options.id,
+      endpoint: '/trending',
+      method: 'GET',
+      query: {
+        count: options.count || 100,
+        cursor: options.cursor || null,
+        tagName: options.tagName || null
+      }
+    }, callback);
+  },
+
+  getTrendingTags: function getTrendingTags(options, callback) {
+    return this._request({
+      api: '/tags',
+      endpoint: '/trending',
       method: 'GET'
+    }, callback);
+  },
+
+  getTrendingTagsPopulated: function getTrendingTagsPopulated(options, callback) {
+    if (!options) options = {};
+
+    return this._request({
+      api: '/tags',
+      endpoint: '/trending/populated',
+      method: 'GET',
+      query: {
+        count: options.count || 100,
+        cursor: options.cursor || null,
+        gfyCount: options.gfyCount || 1
+      }
     }, callback);
   },
 
@@ -124,10 +157,6 @@ GfycatSDK.prototype = {
   * @param callback - (optional) callback function to run when the request completes.
   */
   search: function(options, callback) {
-    if (typeof options === 'undefined' || !options || !options.search_text) {
-      return _handleErr('Please provide options object', callback);
-    }
-
     return this._request({
       api: '/gfycats',
       endpoint: '/search',
@@ -135,9 +164,24 @@ GfycatSDK.prototype = {
       query: {
         search_text: options.search_text,
         count: options.count || 100,
-        start: options.start || 0,
+        start: options.start || null,
         cursor: options.cursor || null
       }
+    }, callback);
+  },
+
+  /**
+  * Search a single gif by gfyId.
+  *
+  * @param options Gfycat API search options
+  *   options.id {String} - search query term or phrase.
+  * @param callback - (optional) callback function to run when the request completes.
+  */
+  searchById: function(options, callback) {
+    return this._request({
+      api: '/gfycats',
+      endpoint: '/' + options.id,
+      method: 'GET'
     }, callback);
   },
 
