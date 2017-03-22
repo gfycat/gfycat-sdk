@@ -3,24 +3,73 @@
 <head>
   <meta charset="utf-8">
   <title>Gfycat SDK</title>
+  <script type="text/javascript" src="https://unpkg.com/t7@0.3.2"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/preact/7.2.0/preact.min.js"></script>
   <script type="text/javascript" src="./dist/gfycat-sdk.umd.bundle.js"></script>
 </head>
 <body>
   <script type="text/javascript">
-    gfycat = new GfycatSDK({
-      client_id: '2_Uu0k2J',
-      client_secret: 'Fo-QAvj4ijte_2b_jBNnX_kU-mI_u4K85LEPlrC8P4krc1LtaLTZkczGWq5Nj1Dl'
-    });
+    // gfycat = new GfycatSDK({
+    //   client_id: '2_Uu0k2J',
+    //   client_secret: 'Fo-QAvj4ijte_2b_jBNnX_kU-mI_u4K85LEPlrC8P4krc1LtaLTZkczGWq5Nj1Dl'
+    // });
 
-    gfycat.authenticate({}).then(res => {
-      gfycat._setToken({access_token: 'asdf', token_type: 'bearer'});
-      gfycat.search({search_text:'dog', count:1}).then(res => console.log('res', res)).catch(err => console.log('err', err));
-    }).catch(err => console.log('auth error', err));
+    // gfycat.authenticate({}).then(res => {
+    //   gfycat._setToken({access_token: 'asdf', token_type: 'bearer'});
+    //   gfycat.search({search_text:'dog', count:1}).then(res => console.log('res', res)).catch(err => console.log('err', err));
+    // }).catch(err => console.log('auth error', err));
 
     // gfycat.authenticate({}, function(err, res) {
     //   gfycat._setToken({access_token: 'asdf', token_type: 'bearer'});
     //   gfycat.search({search_text:'dog', count:1}, (err, res) => console.log('err', err, 'res', res));
     // })
+
+    window.React = { createElement: preact.h };
+
+    t7.module( t7 => {
+    	t7.setOutput(t7.Outputs.React);
+
+    	var App = () => t7`
+    		<div id="app">
+    			<Demo />
+    		</div>
+    	`;
+
+    	class Demo extends preact.Component {
+    		constructor(props, context) {
+    			super(props, context);
+    		}
+
+        componentWillMount() {
+          const gfycat = new GfycatSDK({
+            client_id: '2_Uu0k2J',
+            client_secret: 'Fo-QAvj4ijte_2b_jBNnX_kU-mI_u4K85LEPlrC8P4krc1LtaLTZkczGWq5Nj1Dl'
+          });
+
+          gfycat.authenticate({}).then(res => {
+            gfycat.search({search_text:'nature', count:1})
+              .then(res => this.setState({gif: res.gfycats[0]}))
+              .catch(err => console.log('err', err));
+          }).catch(err => console.log('auth error', err));
+        }
+
+    		render(props, state) {
+          const gif = state.gif ? t7`<img src="${state.gif.max1mbGif}" />` : null;
+
+    			return t7`
+    				<div>
+              <h1>Gfycat SDK Demo</h1>
+              ${gif}
+    				</div>
+    			`;
+    		}
+    	}
+
+    	t7.assign({ App, Demo });
+
+    	preact.render(t7`<App />`, document.body);
+    });
+
   </script>
 </body>
 </html>
