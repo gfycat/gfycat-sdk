@@ -4,12 +4,13 @@
   "description": "Javascript module for gfycat.com API supporting promises and callbacks",
   "main": "lib/index.js",
   "scripts": {
-    "build": "webpack",
+    "build": "NODE_ENV=production webpack",
     "compile": "babel src -d lib",
     "dev": "python3 -m http.server | NODE_ENV=development webpack",
-    "prepublish": "npm run compile",
+    "prepublish": "npm run compile | npm run build",
     "test": "npm run compile && istanbul cover _mocha -- ./test.js -R spec"
   },
+  "browser": "./dist/gfycat-sdk.umd.bundle.min.js",
   "repository": {
     "url": "git+https://github.com/gfycat/gfycat-sdk.git",
     "type": "git"
