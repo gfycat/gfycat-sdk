@@ -103,9 +103,25 @@ GfycatSDK.prototype = {
       endpoint: '/populated',
       method: 'GET',
       query: {
-        gfyCount: options.gfyCount || 1
+        gfyCount: options.gfyCount || 1,
+        cursor: options.cursor || null
       }
     }, callback);
+  },
+
+  getTrendingCategories: function getTrendingCategories(options, callback) {
+    if (!options) options = {};
+
+    return this._request({
+      api: '/reactions',
+      endpoint: '/populated',
+      method: 'GET',
+      query: {
+        gfyCount: options.gfyCount || 1,
+        cursor: options.cursor || null,
+        tagName: options.tagName || 'trending'
+      }
+    }, callback)
   },
 
   getTrending: function getTrending(options, callback) {
