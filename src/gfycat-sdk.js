@@ -179,6 +179,40 @@ export default class Gfycat {
     return this._request(options, callback);
   }
 
+  /**
+   * Get a list of categories
+   */
+  getCategories({gfyCount} = {}, callback) {
+    let options = {
+      path: '/reactions/populated',
+      method: 'GET',
+      query: {
+        gfyCount: gfyCount || 1
+      }
+    }
+
+    return this._request(options, callback)
+  }
+
+  /**
+   * Get gifs for trending category
+   */
+  getTrendingCategories({tagName = 'trending', gfyCount = 1, cursor = null}, callback) {
+    let queryParams = {
+      tagName,
+      gfyCount,
+      cursor
+    }
+
+    let options = {
+      path: '/reactions/populated',
+      method: 'GET',
+      query: queryParams
+    }
+
+    return this._request(options, callback)
+  }
+
 
   /**
    * User feed 
