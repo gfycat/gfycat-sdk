@@ -95,6 +95,15 @@ GfycatSDK.prototype = {
     }
   },
 
+  /**
+  * Retrieve JSON array of reactions/categories. 
+  *
+  * @param options
+  *   options.gfyCount {Number} - number of GIFs to include per category.
+  *   options.locale {String} - locale for requested language.
+  *   options.cursor {String} - cursor for pagination.
+  * @param callback - (optional) callback function to run when the request completes.
+  */
   getCategories: function getCategories(options, callback) {
     if (!options) options = {};
 
@@ -104,11 +113,26 @@ GfycatSDK.prototype = {
       method: 'GET',
       query: {
         gfyCount: options.gfyCount || 1,
-        cursor: options.cursor || null
+        cursor: options.cursor || null,
+        locale: options.locale || null
       }
     }, callback);
   },
 
+  /**
+  * Retrieve JSON array of GIFs in a specific category/reaction specified by tagName.
+  * 
+  * Note: with the exception of "trending" category, 
+  * GIFs belonging to all other reaction categories can be retrieved using the search endpoint.
+  * If the search term used is a category/reaction name, the search API will automatically give
+  * precedence to GIFs that belong in that category.
+  *
+  * @param options
+  *   options.gfyCount {Number} - number of GIFs to return.
+  *   options.cursor {String} - cursor for pagination.
+  *   options.tagName {String} - name of the category/reaction.
+  * @param callback - (optional) callback function to run when the request completes.
+  */
   getTrendingCategories: function getTrendingCategories(options, callback) {
     if (!options) options = {};
 
@@ -124,7 +148,17 @@ GfycatSDK.prototype = {
     }, callback)
   },
 
-  getTrending: function getTrending(options, callback) {
+  /**
+  * Retrieve JSON array of trending GIFs for a given tag. 
+  * If no tag name is provided, the API returns overall trending GIFs.
+  *
+  * @param options
+  *   options.count {Number} - number of GIFs to include per category.
+  *   options.cursor {String} - cursor for pagination.
+  *   options.tagName {String} - (optional) - name of the tag to get trending GIFs from.
+  * @param callback - (optional) callback function to run when the request completes.
+  */
+ getTrending: function getTrending(options, callback) {
     if (!options) options = {};
 
     return this._request({
@@ -139,7 +173,16 @@ GfycatSDK.prototype = {
     }, callback);
   },
 
+  /**
+  * Retrieve JSON array of trending tags.
+  *
+  * @param options - (optional)
+  *   options.cursor {String} - cursor for pagination.
+  * @param callback - (optional) callback function to run when the request completes.
+  */
   getTrendingTags: function getTrendingTags(options, callback) {
+    if (!options) options = {};
+
     return this._request({
       api: '/tags',
       endpoint: '/trending',
@@ -147,6 +190,15 @@ GfycatSDK.prototype = {
     }, callback);
   },
 
+  /**
+  * Retrieve JSON array of trending tags.
+  *
+  * @param options - (optional)
+  *   options.cursor {String} - cursor for pagination.
+  *   options.gfyCount {Number} - total number of gifs to return for each tag.
+  *   options.tagCount {Number} - total number of tags to return.
+  * @param callback - (optional) callback function to run when the request completes.
+  */
   getTrendingTagsPopulated: function getTrendingTagsPopulated(options, callback) {
     if (!options) options = {};
 
@@ -229,8 +281,8 @@ GfycatSDK.prototype = {
       else return Promise.reject('Retry limit reached')
     }
 
-    var token = this.access_token && this.token_type ?
-      this.token_type + ' ' + this.access_token : null;
+    var token = this.access_token ?
+      'Bearer ' + this.access_token : null;
 
     if (token) {
       if (typeof options.headers === 'undefined') options.headers = {};
@@ -306,3 +358,4 @@ GfycatSDK.prototype = {
 };
 
 module.exports = GfycatSDK;
+
