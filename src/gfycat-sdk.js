@@ -3,8 +3,6 @@
 import _http from './util/_http'
 import qs from 'querystring'
 
-const tokenSymbol = Symbol();
-
 /**
  *  Gfycat API wrapper class
  */
@@ -19,7 +17,7 @@ export default class Gfycat {
     this.apiUrl = 'api.gfycat.com';
     this.apiVersion = '/v1';
     this.promiseSupport = typeof Promise !== 'undefined';
-    this[tokenSymbol] = '';
+    this.token = '';
     this.retryLimit = 2;
 
     if (!!clientId) this.clientId = clientId;
@@ -51,7 +49,7 @@ export default class Gfycat {
         if (err) {
           return callback(err);
         } else {
-          this[tokenSymbol] = data.access_token
+          this.token = data.access_token
           return callback(null, data);
         }
       });
@@ -62,7 +60,7 @@ export default class Gfycat {
         this._request(options, (err, data) => {
           if (err) reject(err);
           else {
-            this[tokenSymbol] = data.access_token;
+            this.token = data.access_token;
             resolve(data);
           }
         });
@@ -316,7 +314,7 @@ export default class Gfycat {
       'Accept-Encoding': 'gzip,deflate'
     };
 
-    if (this[tokenSymbol]) headers.Authorization = 'Bearer ' + this[tokenSymbol];
+    if (this.token) headers.Authorization = 'Bearer ' + this.token;
 
     if (options.headers) {
       headers = Object.assign(headers, options.headers);
