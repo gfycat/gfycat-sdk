@@ -1,4 +1,5 @@
 {
+  "plugins": ["transform-runtime"],
   "presets": ["es2015", "stage-0"],
   "ignore": ["src/es5-gfycat-sdk.js", "src/util/http_browser.js"]
 }
