@@ -20,6 +20,7 @@ export default class Gfycat {
     this.apiVersion = '/v1';
     this.promiseSupport = typeof Promise !== 'undefined';
     this[tokenSymbol] = '';
+    this.retryLimit = 2;
 
     if (!!clientId) this.clientId = clientId;
     if (!!clientSecret) this.clientSecret = clientSecret;
@@ -54,8 +55,8 @@ export default class Gfycat {
           return callback(null, data);
         }
       });
-    } 
-    
+    }
+
     else {
       return new Promise( (resolve, reject) => {
         this._request(options, (err, data) => {
@@ -90,13 +91,13 @@ export default class Gfycat {
         } else {
           if ([401, 403, 422].indexOf(err.statusCode) > -1) {
             return callback(err);
-          } else { 
+          } else {
             return callback(null, true);
-          }        
-        }       
+          }
+        }
       });
     }
-    
+
     else {
       return new Promise( (resolve, reject) => {
         this._request(options, (err, data) => {
@@ -116,7 +117,7 @@ export default class Gfycat {
   /**
    *  Search
    *
-   *  @param {Object}  
+   *  @param {Object}
    */
   search({search_text, random = false, count = 1, cursor, first} = {}, callback) {
     if (typeof search_text === 'undefined') {
@@ -215,7 +216,7 @@ export default class Gfycat {
 
 
   /**
-   * User feed 
+   * User feed
    */
   userFeed({userId} = {}, callback) {
     if (typeof userId === 'undefined' || userId === null || userId.length === 0) {
@@ -321,6 +322,11 @@ export default class Gfycat {
       headers = Object.assign(headers, options.headers);
     }
 
+    const counter = options.counter || 0;
+    if (counter >= this.retryLimit) {
+      return this.handleError('Retry limit reached', callback);
+    }
+
     var httpOptions = {
       request: {
         hostname: this.apiUrl,
@@ -334,24 +340,53 @@ export default class Gfycat {
     };
 
     //If callback function is provided, override promise handlers.
+
     if (callback) {
       var resolve = function(res) {
         callback(null, res);
       };
 
       var reject = function(err) {
-        callback(err);
+        // authenticate returns 401 when the credentials are invalid.
+        if (err === 401 && options.path != '/oauth/token') {
+          this.authenticate({}, (err, res) => {
+            if (err) callback(err);
+            else {
+              options.counter = counter + 1;
+              this._request(options, callback);
+            }
+          });
+        } else {
+          callback(err);
+        }
       };
       _http.request(httpOptions, resolve, reject);
     }
 
     //If no callback function is provided and promises are supported, use them.
     else {
-      return new Promise( (resolve, reject) => {
+      return new Promise((resolve, reject) => {
         _http.request(httpOptions, resolve, reject);
+      })
+      .then((res) => {
+        return Promise.resolve(res);
+      })
+      .catch((err) => {
+        // authenticate returns 401 when the credentials are invalid.
+        if (err === 401 && options.path != '/oauth/token') {
+          return this.authenticate({})
+            .then((res) => {
+              options.counter = counter + 1;
+              return this._request(options);
+            })
+            .catch((err) => {
+              return Promise.reject(err);
+            });
+        } else {
+          return Promise.reject(err);
+        }
       });
     }
   }
 
 }
-

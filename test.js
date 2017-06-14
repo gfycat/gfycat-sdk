@@ -18,7 +18,7 @@ describe('Gfycat JS SDK', () => {
     describe('#authenticate()', () => {
 
       it('should callback with err', done => {
-        let opts = { 
+        let opts = {
           clientId: 'asdf',
           clientSecret: 'asdf'
         };
@@ -30,7 +30,7 @@ describe('Gfycat JS SDK', () => {
           done();
         });
       });
-      
+
       it('should callback with res and no err', done => {
         gfycat.authenticate( (err, res) => {
           expect(err).to.not.exist;
@@ -41,23 +41,18 @@ describe('Gfycat JS SDK', () => {
           done();
         });
       });
-    });
 
-    describe('#checkUsername()', () => {
-      it('should callback error with \'401 Unauthorized\' (Invalid Token)', done => {
-        let gfycat = new Gfycat();
-        gfycat.checkUsername({username: 'ricardricard'}, (err, data) => {
-          expect(data).to.not.exist;
-          expect(err).to.exist;
-          expect(err).to.contain.keys('errorMessage', 'statusCode');
-          expect(err.errorMessage).to.contain.keys('code', 'description');
-          expect(err.errorMessage.code).to.equal('Unauthorized');
-          expect(err.errorMessage.description).to.equal('Not authorized to access this endpoint');
-          expect(err.statusCode).to.equal(401);
+      it('should auto authenticate on \'401 Unauthorized\' (Invalid Token)', done => {
+        let gfycat = new Gfycat(opts);
+        gfycat.getCategories({}, (err, data) => {
+          expect(err).to.not.exist;
+          expect(data).to.exist;
           done();
         });
       });
+    });
 
+    describe('#checkUsername()', () => {
       it('should be true with \'404 not found\' (Username Available)', done => {
         let randomString = Math.random().toString(30).substring(10);
         gfycat.checkUsername({username: randomString}, (err, data) => {
@@ -104,19 +99,6 @@ describe('Gfycat JS SDK', () => {
           expect(data.gfycats).to.be.an('array');
           expect(data.found).to.be.a('number');
           expect(data.cursor).to.be.a('string');
-          expect(err).to.not.exist;
-          done();
-        });
-      });
-
-      it('should resolve with errorMessage: \'No search results\'', done => {
-        let randomString = Math.random().toString(30).substring(10);
-        gfycat.search({
-          search_text: randomString
-        }, (err, data) => {
-          expect(data).to.exist;
-          expect(data).to.be.an('object');
-          expect(data).to.have.property('errorMessage', 'No search results'); 
           expect(err).to.not.exist;
           done();
         });
@@ -278,6 +260,7 @@ describe('Gfycat JS SDK', () => {
             }, (err2, data2) => {
               expect(data2.gfycats.length).to.equal(2);
               expect(data1.tag).to.equal(data2.tag);
+              data1.gfycats[0].views = data2.gfycats[0].views = 0;
               expect(data1.gfycats[0]).to.deep.equal(data2.gfycats[0]);
               done();
             });
@@ -403,19 +386,18 @@ describe('Gfycat JS SDK', () => {
             expect(err).to.not.exist;
           });
       });
+
+      it('should auto authenticate on \'401 Unauthorized\' (Invalid Token)', done => {
+        let gfycat = new Gfycat(opts);
+        gfycat.getCategories()
+          .then(data => {
+            expect(data).to.exist;
+            done();
+          });
+      });
     });
 
     describe('#checkUsername()', () => {
-      it('should be false with \'401 Unauthorized\' (Invalid Token)', () => {
-        let noAuth = new Gfycat();
-        return noAuth.checkUsername({username: 'ricardricard'})
-        .then(data => {
-          expect(data).to.be.false;
-        }, err => {
-          expect(err).to.not.exist;
-        });
-      });
-
       it('should be true with \'404 not found\' (Username Available)', () => {
         let randomString = Math.random().toString(30).substring(10);
         return gfycat.checkUsername({username: randomString})
@@ -503,18 +485,7 @@ describe('Gfycat JS SDK', () => {
           });
       });
 
-      it('should resolve with errorMessage: \'No search results\'', () => {
-        let randomString = Math.random().toString(30).substring(10);
-        return gfycat.search({search_text: randomString})
-          .then(data => {
-            expect(data).to.exist;
-            expect(data).to.be.an('object');
-            expect(data).to.have.property('errorMessage', 'No search results'); 
-          }, err => {
-            expect(err).to.not.exist;
-          });
-      });
-it('should resolve with errorMessage:' + '\'search_text is a required parameter for search\'', () => {
+      it('should resolve with errorMessage:' + '\'search_text is a required parameter for search\'', () => {
         return gfycat.search({search_text: ''})
           .then(data => {
             expect(data).to.not.exist;
@@ -546,7 +517,7 @@ it('should resolve with errorMessage:' + '\'search_text is a required parameter 
           });
       });
 
-    }); 
+    });
 
     /*describe('#upload()', () => {
       let gfyId = '';
@@ -718,6 +689,7 @@ it('should resolve with errorMessage:' + '\'search_text is a required parameter 
               expect(values[0].cursor).to.be.a('string');
               expect(values[0].gfycats.length).to.equal(1);
               expect(values[1].gfycats.length).to.equal(2);
+              values[0].gfycats[0].views = values[1].gfycats[0].views = 0;
               expect(values[0].gfycats[0]).to.deep.equal(values[1].gfycats[0]);
             });
           });

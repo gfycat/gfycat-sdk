@@ -33,18 +33,16 @@ exports.request = (options, resolve, reject) => {
     });
 
     output.on('end', () => {
-      if (res.statusCode >= 400 && res.statusCode < 500) {
-        return reject(body);
-      }
-
       try {
         body = JSON.parse(body);
       } catch (e) {
-        body = body;
-        return reject(e);
+        body = {};
       }
 
       body.statusCode = res.statusCode;
+      if (body.statusCode >= 400) {
+        return reject(body);
+      }
 
       return resolve(body);
     });
