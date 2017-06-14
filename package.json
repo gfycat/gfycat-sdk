@@ -7,7 +7,7 @@
     "build": "rimraf dist && NODE_ENV=production webpack",
     "compile": "rimraf lib && babel src -d lib",
     "dev": "python3 -m http.server | NODE_ENV=development webpack",
-    "prepublish": "npm run compile | npm run build",
+    "prepublish": "npm run compile || npm run build",
     "test": "npm run compile && istanbul cover _mocha -- ./test.js -R spec"
   },
   "browser": "./dist/gfycat-sdk.umd.bundle.min.js",
