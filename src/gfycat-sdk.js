@@ -233,12 +233,12 @@ export default class Gfycat {
   /**
    *  Trending
    */
-  trendingGifs({count = 1} = {}, callback) {
+  trendingGifs(opts = {count: 1}, callback) {
 
     var options = {
       path: '/gfycats/trending',
       method: 'GET',
-      query: {count: count}
+      query: opts
     };
 
     return this._request(options, callback);
@@ -340,14 +340,14 @@ export default class Gfycat {
     //If callback function is provided, override promise handlers.
 
     if (callback) {
-      var resolve = function(res) {
+      var resolve = (res)=>{
         callback(null, res);
       };
 
-      var reject = function(err) {
+      var reject = (err)=>{
         // authenticate returns 401 when the credentials are invalid.
-        if (err === 401 && options.path != '/oauth/token') {
-          this.authenticate({}, (err, res) => {
+        if (err.statusCode === 401 && options.path != '/oauth/token') {
+          this.authenticate((err, res) => {
             if (err) callback(err);
             else {
               options.counter = counter + 1;
@@ -371,8 +371,8 @@ export default class Gfycat {
       })
       .catch((err) => {
         // authenticate returns 401 when the credentials are invalid.
-        if (err === 401 && options.path != '/oauth/token') {
-          return this.authenticate({})
+        if (err.statusCode === 401 && options.path != '/oauth/token') {
+          return this.authenticate()
             .then((res) => {
               options.counter = counter + 1;
               return this._request(options);

@@ -236,6 +236,7 @@ describe('Gfycat JS SDK', () => {
         }, (err, data) => {
           expect(data).to.be.an('object');
           expect(data).to.include.keys('tag', 'cursor', 'gfycats', 'digest', 'newGfycats');
+          expect(data.tag).to.equal('hello');
           expect(data.gfycats).to.be.an('array');
           expect(data.gfycats.length).to.equal(1);
           expect(data.cursor).to.be.a('string');
@@ -669,6 +670,7 @@ describe('Gfycat JS SDK', () => {
           .then(data => {
             expect(data).to.be.an('object');
             expect(data).to.include.keys('tag', 'cursor', 'gfycats', 'digest', 'newGfycats');
+            expect(data.tag).to.equal('hello');
             expect(data.gfycats).to.be.an('array');
             expect(data.gfycats.length).to.equal(1);
             expect(data.cursor).to.be.a('string');
