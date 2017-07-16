@@ -2,6 +2,7 @@ var queryString = require('qs');
 var httpService = require('./util/http_browser');
 
 var API_HOSTNAME = 'https://api.gfycat.com';
+var FILE_API_HOSTNAME = 'https://filedrop.gfycat.com'
 var API_BASE_PATH = '/v1';
 
 // Check for Promise support
@@ -64,8 +65,7 @@ GfycatSDK.prototype = {
     }
 
     var options = {
-      api: '/oauth',
-      endpoint: '/token',
+      api: '/oauth/token',
       method: 'POST',
       payload: {
         client_id: options.client_id || this.client_id,
@@ -96,7 +96,7 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * Retrieve JSON array of reactions/categories. 
+  * Retrieve JSON array of reactions/categories.
   *
   * @param options
   *   options.gfyCount {Number} - number of GIFs to include per category.
@@ -108,8 +108,7 @@ GfycatSDK.prototype = {
     if (!options) options = {};
 
     return this._request({
-      api: '/reactions',
-      endpoint: '/populated',
+      api: '/reactions/populated',
       method: 'GET',
       query: {
         gfyCount: options.gfyCount || 1,
@@ -121,8 +120,8 @@ GfycatSDK.prototype = {
 
   /**
   * Retrieve JSON array of GIFs in a specific category/reaction specified by tagName.
-  * 
-  * Note: with the exception of "trending" category, 
+  *
+  * Note: with the exception of "trending" category,
   * GIFs belonging to all other reaction categories can be retrieved using the search endpoint.
   * If the search term used is a category/reaction name, the search API will automatically give
   * precedence to GIFs that belong in that category.
@@ -137,8 +136,7 @@ GfycatSDK.prototype = {
     if (!options) options = {};
 
     return this._request({
-      api: '/reactions',
-      endpoint: '/populated',
+      api: '/reactions/populated',
       method: 'GET',
       query: {
         gfyCount: options.gfyCount || 1,
@@ -149,7 +147,7 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * Retrieve JSON array of trending GIFs for a given tag. 
+  * Retrieve JSON array of trending GIFs for a given tag.
   * If no tag name is provided, the API returns overall trending GIFs.
   *
   * @param options
@@ -162,8 +160,7 @@ GfycatSDK.prototype = {
     if (!options) options = {};
 
     return this._request({
-      api: '/gfycats',
-      endpoint: '/trending',
+      api: '/gfycats/trending',
       method: 'GET',
       query: {
         count: options.count || 100,
@@ -184,8 +181,7 @@ GfycatSDK.prototype = {
     if (!options) options = {};
 
     return this._request({
-      api: '/tags',
-      endpoint: '/trending',
+      api: '/tags/trending',
       method: 'GET'
     }, callback);
   },
@@ -203,8 +199,7 @@ GfycatSDK.prototype = {
     if (!options) options = {};
 
     return this._request({
-      api: '/tags',
-      endpoint: '/trending/populated',
+      api: '/tags/trending/populated',
       method: 'GET',
       query: {
         count: options.count || 100,
@@ -226,8 +221,7 @@ GfycatSDK.prototype = {
   */
   search: function(options, callback) {
     return this._request({
-      api: '/gfycats',
-      endpoint: '/search',
+      api: '/gfycats/search',
       method: 'GET',
       query: {
         search_text: options.search_text,
@@ -247,9 +241,48 @@ GfycatSDK.prototype = {
   */
   searchById: function(options, callback) {
     return this._request({
-      api: '/gfycats',
-      endpoint: '/' + options.id,
+      api: '/gfycats/' + options.id,
       method: 'GET'
+    }, callback);
+  },
+
+
+  /**
+   *  Upload by URL
+   */
+  upload: function(options, callback) {
+    options = options || {}
+
+    return this._request({
+      api: '/gfycats',
+      method: 'POST',
+      payload: options
+    }, callback);
+  },
+
+
+  /**
+   *  Upload by URL
+   */
+  uploadStatus: function(gfyname, callback) {
+    return this._request({
+      api: '/gfycats/fetch/status/' + gfyname,
+      method: 'GET'
+    }, callback);
+  },
+
+
+  /**
+   *  Upload a local file
+   */
+  uploadFile: function(options, callback) {
+    if (!options.gfyname || !options.file)
+      return _handleErr('invalid arguments', callback)
+
+    return this._request({
+      apiUrl: FILE_API_HOSTNAME + '/' + options.gfyname,
+      method: 'PUT',
+      file: options.file
     }, callback);
   },
 
@@ -258,7 +291,6 @@ GfycatSDK.prototype = {
   *
   * @param options
   *   options.api {String} - API type.
-  *   options.endpoint {String} - The API method.
   *   options.method {String} - The http method to be used.
   *   options.payload {Object} - JSON data to be sent in POST requests.
   *   options.query {Object} - (optional) Query string parameters.
@@ -284,9 +316,9 @@ GfycatSDK.prototype = {
     var token = this.access_token ?
       'Bearer ' + this.access_token : null;
 
-    if (token) {
+    if (token && !options.apiUrl) {
       if (typeof options.headers === 'undefined') options.headers = {};
-      options.headers['Authorization'] = this.access_token;
+      options.headers['Authorization'] = token;
     }
 
     var query = '';
@@ -300,7 +332,8 @@ GfycatSDK.prototype = {
         headers: options.headers || null,
         method: options.method,
         payload: options.payload || null,
-        url: this.apiUrl + options.api + options.endpoint + query
+        file: options.file || null,
+        url: (options.apiUrl || this.apiUrl) + (options.api || '') + query
       },
       timeout: options.timeout || this.timeout
     };
@@ -358,4 +391,3 @@ GfycatSDK.prototype = {
 };
 
 module.exports = GfycatSDK;
-

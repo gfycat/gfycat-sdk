@@ -36,7 +36,7 @@ exports.request = function(options, resolve, reject) {
       body = JSON.parse(body);
       resolve(body)
     } catch (e) {
-      reject(e)
+      resolve({})
     }
   }
 
@@ -53,12 +53,16 @@ exports.request = function(options, resolve, reject) {
     })
   }
 
-  var data = JSON.stringify(options.request.payload) || null;
-
-  if (!data) {
-    xhr.send();
+  if (options.request.file) {
+    xhr.send(options.request.file);
   } else {
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send(data);
+    var data = JSON.stringify(options.request.payload) || null;
+
+    if (!data) {
+      xhr.send();
+    } else {
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.send(data);
+    }
   }
 }
