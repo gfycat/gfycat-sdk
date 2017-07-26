@@ -254,6 +254,25 @@ GfycatSDK.prototype = {
   },
 
   /**
+  * @param options (required)
+  *   options.uploadKey {String} - the key of the upload.
+  * @param callback - (optional) callback function to run when the request completes.
+  */
+  artifacts: function(options, callback) {
+    return this._request({
+      api: '/gifartifacts',
+      endpoint: '',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      method: 'POST',
+      payload: {
+        'uploadKey': options.uploadKey
+      }
+    }, callback);
+  },
+
+  /**
   * Prepares the HTTP request and query string
   *
   * @param options
@@ -358,4 +377,3 @@ GfycatSDK.prototype = {
 };
 
 module.exports = GfycatSDK;
-
