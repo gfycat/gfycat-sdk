@@ -96,7 +96,7 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * Retrieve JSON array of reactions/categories. 
+  * Retrieve JSON array of reactions/categories.
   *
   * @param options
   *   options.gfyCount {Number} - number of GIFs to include per category.
@@ -121,8 +121,8 @@ GfycatSDK.prototype = {
 
   /**
   * Retrieve JSON array of GIFs in a specific category/reaction specified by tagName.
-  * 
-  * Note: with the exception of "trending" category, 
+  *
+  * Note: with the exception of "trending" category,
   * GIFs belonging to all other reaction categories can be retrieved using the search endpoint.
   * If the search term used is a category/reaction name, the search API will automatically give
   * precedence to GIFs that belong in that category.
@@ -149,7 +149,7 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * Retrieve JSON array of trending GIFs for a given tag. 
+  * Retrieve JSON array of trending GIFs for a given tag.
   * If no tag name is provided, the API returns overall trending GIFs.
   *
   * @param options
@@ -256,6 +256,7 @@ GfycatSDK.prototype = {
   /**
   * @param options (required)
   *   options.uploadKey {String} - the key of the upload.
+  *   options.tags {String[]} - the tags to associate with this gfycat
   * @param callback - (optional) callback function to run when the request completes.
   */
   artifacts: function(options, callback) {
@@ -267,7 +268,8 @@ GfycatSDK.prototype = {
       },
       method: 'POST',
       payload: {
-        'uploadKey': options.uploadKey
+        uploadKey: options.uploadKey,
+        tags: options.tags
       }
     }, callback);
   },
