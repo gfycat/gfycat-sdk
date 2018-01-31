@@ -10,18 +10,24 @@ export default class Gfycat {
 
   /**
    *  Create a Gfycat SDK object.
+   *  @param {string} grantType - This field determines which grant type you are requesting, for the client credentials grant this value is client_credentials.
    *  @param {string} clientId - Client id retrieved from the developers portal.
    *  @param {string} clientSecret - Client secret retrieved from the developers portal.
+   *  @param {string} username - Gfycat username linked to your API account.
+   *  @param {string} password - Gfycat password linked to your API account.
    */
-  constructor({clientId, clientSecret} = {}) {
+  constructor({grantType, clientId, clientSecret, username, password} = {}) {
     this.apiUrl = 'api.gfycat.com';
     this.apiVersion = '/v1';
     this.promiseSupport = typeof Promise !== 'undefined';
     this.token = '';
     this.retryLimit = 2;
 
+    if (!!grantType) this.grantType = grantType;
     if (!!clientId) this.clientId = clientId;
     if (!!clientSecret) this.clientSecret = clientSecret;
+    if (!!username) this.username = username;
+    if (!!password) this.password = password;
   }
 
 
@@ -32,9 +38,11 @@ export default class Gfycat {
    */
   authenticate(callback) {
     let postData = {
-      grant_type : 'client_credentials',
+      grant_type : this.grantType || 'client_credentials',
       client_id : this.clientId,
       client_secret : this.clientSecret,
+      username: this.username,
+      password: this.password,
       scope: 'scope' // Currently does not do anything
     };
 
