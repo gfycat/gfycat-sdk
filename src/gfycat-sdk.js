@@ -144,7 +144,6 @@ export default class Gfycat {
     return this._request(options, callback);
   }
 
-
   /**
    * Get User info by ID
    */
@@ -174,6 +173,28 @@ export default class Gfycat {
       path: '/gfycats/' + gfyId,
       method: 'GET'
     };
+
+    return this._request(options, callback);
+  }
+
+  /**
+   * Get gifs that are related to a gif.
+   */
+  getRelatedContent({gfyId, count, cursor, from}, callback) {
+    if (typeof gfyId === 'undefined' || gfyId === null || gfyId.length === 0) {
+      return this.handleError('invalid gfyId', callback);
+    }
+
+    let queryParams = {};
+    if (count) queryParams.count = count;
+    if (cursor) queryParams.cursor = cursor;
+    if (from) queryParams.from = from;
+
+    let options = {
+      path: `/gfycats/${gfyId}/related`,
+      method: 'GET',
+      query: queryParams
+    }
 
     return this._request(options, callback);
   }
