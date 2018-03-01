@@ -193,6 +193,20 @@ describe('Gfycat JS SDK', () => {
       });
     });
 
+    describe('#getRelatedContent()', () => {
+      it('should resolve with gfycats', done => {
+        gfycat.getRelatedContent({
+          gfyId: 'BrutalSavageRekt'
+        }, (err, data) => {
+          expect(err).to.not.exist;
+          expect(data).to.be.an('object');
+          expect(data).to.include.keys('gfycats', 'cursor');
+          expect(data.gfycats).to.be.an('array');
+          done();
+        })
+      })
+    })
+
     describe('#userFeed()', () => {
       it('should resolve with user feed', done => {
         let opts = {

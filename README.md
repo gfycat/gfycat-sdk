@@ -86,6 +86,17 @@ let options = {
 gfycat.getGifDetails(options).then(data => console.log(data))
 ```
 
+### Get Related Content
+Return a list of Gfycats related to the one provided.
+
+```javascript
+let options = {
+  gfyId: 'richpepperyferret'
+};
+
+gfycat.getRelatedContent(options).then(data => console.log(data))
+```
+
 ### Get User Feed
 Return the gfycats uploaded and shared by a given username.
 
