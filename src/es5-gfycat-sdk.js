@@ -242,13 +242,28 @@ GfycatSDK.prototype = {
   * Search a single gif by gfyId.
   *
   * @param options Gfycat API search options
-  *   options.id {String} - search query term or phrase.
+  *   options.id {String} - gfycat id
   * @param callback - (optional) callback function to run when the request completes.
   */
   searchById: function(options, callback) {
     return this._request({
       api: '/gfycats',
       endpoint: '/' + options.id,
+      method: 'GET'
+    }, callback);
+  },
+
+  /**
+  * Get a list of gifs related to a given gif
+  *
+  * @param options Gfycat API search options
+  *   options.id {String} - gfycat id
+  * @param callback - (optional) callback function to run when the request completes.
+  */
+  getRelatedContent: function(options, callback) {
+    return this._request({
+      api: '/gfycats',
+      endpoint: '/' + options.id + '/related',
       method: 'GET'
     }, callback);
   },
