@@ -328,6 +328,15 @@ GfycatSDK.prototype = {
     var query = '';
 
     if (typeof options.query === 'object' && Object.keys(options.query).length) {
+
+      // Omit null values from querystring
+      for (var key in options.query) {
+        // Using == intentionally to match null and undefined
+        if (options.query[key] == null) {
+          delete options.query[key]
+        }
+      }
+
       query = '?' + queryString.stringify(options.query);
     }
 
