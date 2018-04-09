@@ -113,6 +113,7 @@ GfycatSDK.prototype = {
       method: 'GET',
       query: {
         gfyCount: options.gfyCount || 1,
+        count: options.count || null,
         cursor: options.cursor || null,
         locale: options.locale || null
       }
