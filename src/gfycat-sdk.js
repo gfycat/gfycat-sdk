@@ -202,11 +202,12 @@ export default class Gfycat {
   /**
    * Get a list of categories
    */
-  getCategories({gfyCount} = {}, callback) {
+  getCategories({count, gfyCount} = {}, callback) {
     let options = {
       path: '/reactions/populated',
       method: 'GET',
       query: {
+        ...count && {count},
         gfyCount: gfyCount || 1
       }
     }
