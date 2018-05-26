@@ -265,7 +265,12 @@ GfycatSDK.prototype = {
     return this._request({
       api: '/gfycats',
       endpoint: '/' + options.id + '/related',
-      method: 'GET'
+      method: 'GET',
+      query: {
+        cursor: options.cursor,
+        count: options.count,
+        from: options.from
+      }
     }, callback);
   },
 
