@@ -6,7 +6,8 @@ const fs = require('fs');
 // const sinon = require('sinon');
 
 
-describe('Gfycat JS SDK', () => {
+describe('Gfycat JS SDK', function () {
+  this.timeout(10000)
 
   describe('Callback based response', () => {
     let opts = {
