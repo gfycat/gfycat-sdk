@@ -303,6 +303,25 @@ GfycatSDK.prototype = {
   },
 
   /**
+   * @param {Object} options
+   * @param {string} options.search_text - (optional) Search query
+   * @param {string} options.cursor - (optional) Cursor for pagination
+   * @param {number} options.count - (optional) Number of GIFs to return.
+   * @param {requestCallback} callback - (optional) callback function to run when the request completes.
+   */
+  stickers: function(options, callback) {
+    return this._request({
+      api: '/stickers',
+      endpoint: options.search_text ? '/search' : '',
+      method: 'GET',
+      query: {
+        cursor: options.cursor,
+        count: options.count,
+        search_text: options.search_text
+      }
+    });
+  },
+
   /**
    * Prepares the HTTP request and query string
    *
