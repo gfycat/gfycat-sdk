@@ -6,7 +6,8 @@ const fs = require('fs');
 // const sinon = require('sinon');
 
 
-describe('Gfycat JS SDK', () => {
+describe('Gfycat JS SDK', function () {
+  this.timeout(10000)
 
   describe('Callback based response', () => {
     let opts = {
@@ -100,17 +101,6 @@ describe('Gfycat JS SDK', () => {
           expect(data.found).to.be.a('number');
           expect(data.cursor).to.be.a('string');
           expect(err).to.not.exist;
-          done();
-        });
-      });
-
-      it('should resolve with errorMessage: \'search_text is a required parameter for search\'', done => {
-        gfycat.search({
-          search_text: ''
-        }, (err, data) => {
-          expect(data).to.not.exist;
-          expect(err).to.exist;
-          expect(err).to.include.key('errorMessage');
           done();
         });
       });
@@ -497,16 +487,6 @@ describe('Gfycat JS SDK', () => {
             expect(data.cursor).to.be.a('string');
           }, err => {
             expect(err).to.not.exist;
-          });
-      });
-
-      it('should resolve with errorMessage:' + '\'search_text is a required parameter for search\'', () => {
-        return gfycat.search({search_text: ''})
-          .then(data => {
-            expect(data).to.not.exist;
-          }, err => {
-            expect(err).to.exist;
-            expect(err).to.include.key('errorMessage');
           });
       });
 
