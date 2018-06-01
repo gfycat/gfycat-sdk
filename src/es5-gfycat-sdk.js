@@ -7,12 +7,18 @@ var API_BASE_PATH = '/v1';
 // Check for Promise support
 var promisesExist = typeof Promise !== 'undefined';
 
+/**
+ * @callback requestCallback - callback function to run when the request completes.
+ * @param {Error} error
+ * @param response
+ */
 
 /**
-* Error handler that supports promises and callbacks
-* @param err {String} - Error message
-* @param callback
-*/
+ * Error handler that supports promises and callbacks
+ * @param {string} err - Error message
+ * @param {requestCallback} callback
+ * @ignore
+ */
 function _handleErr(err, callback) {
   if (callback) {
     return callback(err);
@@ -25,11 +31,12 @@ function _handleErr(err, callback) {
 
 
 /**
-* @param options {Object} - Options object.
-*   options.client_id {String} - Gfycat API client id.
-*   options.client_secret {String} - Gfycat API secret.
-*   options.timeout {Number} - (optional) API timeout limit in milliseconds (default is 30000).
-*/
+ * @param {Object} options
+ * @param {string} options.client_id - Gfycat API client id.
+ * @param {string} options.client_secret - Gfycat API secret.
+ * @param {number} options.timeout - (optional) API timeout limit in milliseconds (default is 30000).
+ * @class
+ */
 var GfycatSDK = function(options) {
   if (typeof options === 'object' && options.hasOwnProperty('client_id') && options.hasOwnProperty('client_secret')) {
     this.client_id = options.client_id;
@@ -49,14 +56,14 @@ var GfycatSDK = function(options) {
 
 GfycatSDK.prototype = {
   /**
-  * Retrieve Oauth token.
-  *
-  * @param options {Object} - (optional if id and secret were provided in constructor)
-  *   options.client_id {String} - Gfycat client id.
-  *   options.client_secret {String} - Gfycat client secret.
-  *   options.grant_type {String} - Oauth grant type. 'client_credentials' by default.
-  * @param callback - (optional) callback function to run when the request completes.
-  */
+   * Retrieve Oauth token.
+   *
+   * @param options - (optional if id and secret were provided in constructor)
+   * @param {string} options.client_id - Gfycat client id.
+   * @param {string} options.client_secret - Gfycat client secret.
+   * @param {string} options.grant_type - Oauth grant type. 'client_credentials' by default.
+   * @param {requestCallback} callback - (optional) callback function to run when the request completes.
+   */
   authenticate: function(options, callback) {
     if (!options) options = {};
     if (!(this.client_id || this.client_secret) && !(options.client_id || options.client_secret)) {
@@ -96,14 +103,14 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * Retrieve JSON array of reactions/categories.
-  *
-  * @param options
-  *   options.gfyCount {Number} - number of GIFs to include per category.
-  *   options.locale {String} - locale for requested language.
-  *   options.cursor {String} - cursor for pagination.
-  * @param callback - (optional) callback function to run when the request completes.
-  */
+   * Retrieve JSON array of reactions/categories.
+   *
+   * @param {Object} options
+   * @param {number} options.gfyCount - number of GIFs to include per category.
+   * @param {string} options.locale - locale for requested language.
+   * @param {string} options.cursor - cursor for pagination.
+   * @param {requestCallback} callback - (optional) callback function to run when the request completes.
+   */
   getCategories: function getCategories(options, callback) {
     if (!options) options = {};
 
@@ -121,19 +128,19 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * Retrieve JSON array of GIFs in a specific category/reaction specified by tagName.
-  *
-  * Note: with the exception of "trending" category,
-  * GIFs belonging to all other reaction categories can be retrieved using the search endpoint.
-  * If the search term used is a category/reaction name, the search API will automatically give
-  * precedence to GIFs that belong in that category.
-  *
-  * @param options
-  *   options.gfyCount {Number} - number of GIFs to return.
-  *   options.cursor {String} - cursor for pagination.
-  *   options.tagName {String} - name of the category/reaction.
-  * @param callback - (optional) callback function to run when the request completes.
-  */
+   * Retrieve JSON array of GIFs in a specific category/reaction specified by tagName.
+   *
+   * Note: with the exception of "trending" category,
+   * GIFs belonging to all other reaction categories can be retrieved using the search endpoint.
+   * If the search term used is a category/reaction name, the search API will automatically give
+   * precedence to GIFs that belong in that category.
+   *
+   * @param {Object} options
+   * @param {number} options.gfyCount - number of GIFs to return.
+   * @param {string} options.cursor - cursor for pagination.
+   * @param {string} options.tagName - name of the category/reaction.
+   * @param {requestCallback} callback - (optional) callback function to run when the request completes.
+   */
   getTrendingCategories: function getTrendingCategories(options, callback) {
     if (!options) options = {};
 
@@ -150,16 +157,16 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * Retrieve JSON array of trending GIFs for a given tag.
-  * If no tag name is provided, the API returns overall trending GIFs.
-  *
-  * @param options
-  *   options.count {Number} - number of GIFs to include per category.
-  *   options.cursor {String} - cursor for pagination.
-  *   options.tagName {String} - (optional) - name of the tag to get trending GIFs from.
-  * @param callback - (optional) callback function to run when the request completes.
-  */
- getTrending: function getTrending(options, callback) {
+   * Retrieve JSON array of trending GIFs for a given tag.
+   * If no tag name is provided, the API returns overall trending GIFs.
+   *
+   * @param {Object} options
+   * @param {number} options.count - number of GIFs to include per category.
+   * @param {string} options.cursor - cursor for pagination.
+   * @param {string} options.tagName - (optional) - name of the tag to get trending GIFs from.
+   * @param {requestCallback} callback - (optional) callback function to run when the request completes.
+   */
+  getTrending: function getTrending(options, callback) {
     if (!options) options = {};
 
     return this._request({
@@ -175,12 +182,12 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * Retrieve JSON array of trending tags.
-  *
-  * @param options - (optional)
-  *   options.cursor {String} - cursor for pagination.
-  * @param callback - (optional) callback function to run when the request completes.
-  */
+   * Retrieve JSON array of trending tags.
+   *
+   * @param {Object} options
+   * @param {string} options.cursor - cursor for pagination.
+   * @param {requestCallback} callback - (optional) callback function to run when the request completes.
+   */
   getTrendingTags: function getTrendingTags(options, callback) {
     if (!options) options = {};
 
@@ -192,14 +199,14 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * Retrieve JSON array of trending tags.
-  *
-  * @param options - (optional)
-  *   options.cursor {String} - cursor for pagination.
-  *   options.gfyCount {Number} - total number of gifs to return for each tag.
-  *   options.tagCount {Number} - total number of tags to return.
-  * @param callback - (optional) callback function to run when the request completes.
-  */
+   * Retrieve JSON array of trending tags.
+   *
+   * @param {Object} options
+   * @param {string} options.cursor - cursor for pagination.
+   * @param {number} options.gfyCount - total number of gifs to return for each tag.
+   * @param {number} options.tagCount - total number of tags to return.
+   * @param {requestCallback} callback - (optional) callback function to run when the request completes.
+   */
   getTrendingTagsPopulated: function getTrendingTagsPopulated(options, callback) {
     if (!options) options = {};
 
@@ -216,15 +223,15 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * Search all GIFs. For pagination, please only specify either cursor (& count), or count & start.
-  *
-  * @param options Gfycat API search options
-  *   options.search_text {String} - search query term or phrase.
-  *   options.count {Number} - (optional) number of results to return, defaults to 100.
-  *   options.start {Number} - (optional) results offset, defaults to 0.
-  *   options.cursor {String} - cursor for pagination.
-  * @param callback - (optional) callback function to run when the request completes.
-  */
+   * Search all GIFs. For pagination, please only specify either cursor (& count), or count & start.
+   *
+   * @param {Object} options
+   * @param {string} options.search_text - search query term or phrase.
+   * @param {number} options.count - (optional) number of results to return, defaults to 100.
+   * @param {number} options.start - (optional) results offset, defaults to 0.
+   * @param {string} options.cursor - cursor for pagination.
+   * @param {requestCallback} callback - (optional) callback function to run when the request completes.
+   */
   search: function(options, callback) {
     return this._request({
       api: '/gfycats',
@@ -240,12 +247,12 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * Search a single gif by gfyId.
-  *
-  * @param options Gfycat API search options
-  *   options.id {String} - gfycat id
-  * @param callback - (optional) callback function to run when the request completes.
-  */
+   * Search a single gif by gfyId.
+   *
+   * @param {Object} options
+   * @param {string} options.id - gfycat id
+   * @param {requestCallback} callback - (optional) callback function to run when the request completes.
+   */
   searchById: function(options, callback) {
     return this._request({
       api: '/gfycats',
@@ -255,12 +262,12 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * Get a list of gifs related to a given gif
-  *
-  * @param options Gfycat API search options
-  *   options.id {String} - gfycat id
-  * @param callback - (optional) callback function to run when the request completes.
-  */
+   * Get a list of gifs related to a given gif
+   *
+   * @param {Object} options
+   * @param {string} options.id - gfycat id
+   * @param {requestCallback} callback - (optional) callback function to run when the request completes.
+   */
   getRelatedContent: function(options, callback) {
     return this._request({
       api: '/gfycats',
@@ -275,11 +282,11 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * @param options (required)
-  *   options.uploadKey {String} - the key of the upload.
-  *   options.tags {String[]} - the tags to associate with this gfycat
-  * @param callback - (optional) callback function to run when the request completes.
-  */
+   * @param {Object} options
+   * @param {string} options.uploadKey - the key of the upload.
+   * @param {string[]} options.tags - the tags to associate with this gfycat
+   * @param {requestCallback} callback - (optional) callback function to run when the request completes.
+   */
   artifacts: function(options, callback) {
     return this._request({
       api: '/gifartifacts',
@@ -296,17 +303,19 @@ GfycatSDK.prototype = {
   },
 
   /**
-  * Prepares the HTTP request and query string
-  *
-  * @param options
-  *   options.api {String} - API type.
-  *   options.endpoint {String} - The API method.
-  *   options.method {String} - The http method to be used.
-  *   options.payload {Object} - JSON data to be sent in POST requests.
-  *   options.query {Object} - (optional) Query string parameters.
-  *   options.timeout {Number} - (optional) API timeout limit in milliseconds.
-  * @param callback - (optional) Callback function to be invoked upon completed request.
-  */
+  /**
+   * Prepares the HTTP request and query string
+   *
+   * @param {Object} options
+   * @param {string} options.api - API type.
+   * @param {string} options.endpoint - The API method.
+   * @param {string} options.method - The http method to be used.
+   * @param {Object} options.payload - JSON data to be sent in POST requests.
+   * @param {Object} options.query - (optional) Query string parameters.
+   * @param {number} options.timeout - (optional) API timeout limit in milliseconds.
+   * @param {requestCallback} callback - (optional) callback function to run when the request completes.
+   * @ignore
+   */
   _request: function(options, callback) {
     if (!callback && !promisesExist) {
       throw new Error('Callback must be provided if promises are unavailable');
