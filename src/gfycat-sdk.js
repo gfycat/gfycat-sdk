@@ -301,6 +301,18 @@ export default class Gfycat {
     return this._request(options, callback);
   }
 
+  stickers(opts, callback) {
+    if (!opts) opts = {}
+    return this._request({
+      path: opts.search_text ? '/stickers/search' : '/stickers',
+      method: 'GET',
+      query: {
+        cursor: opts.cursor,
+        count: opts.count,
+        search_text: opts.search_text,
+      }
+    }, callback)
+  }
 
   /**
    *  Check upload status

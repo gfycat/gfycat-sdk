@@ -346,6 +346,29 @@ describe('Gfycat JS SDK', function () {
         });
       });
     });
+
+    describe('#stickers', () => {
+      it('should get stickers', done => {
+        gfycat.stickers({
+          count: 1
+        }, (err, data) => {
+          expect(data.cursor).to.be.a('string')
+          expect(data.gfycats.length).to.be.equal(1);
+          done();
+        });
+      });
+
+      it('should search stickers', done => {
+        gfycat.stickers({
+          count: 1,
+          search_text: 'cat'
+        }, (err, data) => {
+          expect(data.cursor).to.be.a('string')
+          expect(data.gfycats.length).to.be.equal(1);
+          done();
+        });
+      });
+    });
   });
 
   describe('Promise based response', () => {
@@ -747,6 +770,29 @@ describe('Gfycat JS SDK', function () {
               expect(values[0].tags[0]).to.deep.equal(values[1].tags[0]);
             });
           });
+      });
+    });
+
+    describe('#stickers', () => {
+      it('should get stickers', done => {
+        gfycat.stickers({
+          count: 1
+        }).then(data => {
+          expect(data.cursor).to.be.a('string')
+          expect(data.gfycats.length).to.be.equal(1);
+          done();
+        });
+      });
+
+      it('should search stickers', done => {
+        gfycat.stickers({
+          count: 1,
+          search_text: 'cat'
+        }).then(data => {
+          expect(data.cursor).to.be.a('string')
+          expect(data.gfycats.length).to.be.equal(1);
+          done();
+        });
       });
     });
   });
