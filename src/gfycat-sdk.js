@@ -270,9 +270,8 @@ export default class Gfycat {
   /**
    *  Trending tags
    */
-  trendingTags(opts, callback) {
+  trendingTags(opts = {}, callback) {
     let path = '/tags/trending';
-    if (!opts) opts = {};
     if (opts.populated) path += '/populated';
     // if (opts.cursor) queryParams.cursor = cursor;
 
@@ -301,8 +300,7 @@ export default class Gfycat {
     return this._request(options, callback);
   }
 
-  stickers(opts, callback) {
-    if (!opts) opts = {}
+  stickers(opts = {}, callback) {
     return this._request({
       path: opts.search_text ? '/stickers/search' : '/stickers',
       method: 'GET',
