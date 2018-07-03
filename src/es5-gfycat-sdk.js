@@ -391,7 +391,7 @@ GfycatSDK.prototype = {
         callback(null, res);
       };
       var reject = function(err) {
-        if (err === 401) {
+        if (err === 401 && options.api !== '/oauth') {
           self.authenticate({}, function(err, res) {
             if (err) callback(err);
             else {
@@ -414,7 +414,7 @@ GfycatSDK.prototype = {
           return Promise.resolve(res);
         })
         .catch(function(err) {
-          if (err === 401) {
+          if (err === 401 && options.api !== '/oauth') {
             return self.authenticate({})
               .then(function(res) {
                 options.counter = counter + 1;
