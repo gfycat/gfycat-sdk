@@ -1,6 +1,6 @@
 {
   "name": "gfycat-sdk",
-  "version": "1.4.17",
+  "version": "1.4.18",
   "description": "Javascript module for gfycat.com API supporting promises and callbacks",
   "main": "lib/index.js",
   "scripts": {
